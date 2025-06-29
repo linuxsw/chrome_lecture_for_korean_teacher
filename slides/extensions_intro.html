@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="ko">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
         font-family: 'Noto Sans KR', sans-serif;
@@ -17,7 +26,7 @@
       .slide-container {
         width: 1280px;
         min-height: 720px;
-        background: #F5F5F5;
+        background: #f5f5f5;
         padding: 40px;
       }
       .header {
@@ -28,7 +37,7 @@
       .title {
         font-size: 36px;
         font-weight: 700;
-        color: #4285F4;
+        color: #4285f4;
         margin-left: 20px;
       }
       .chrome-logo-small {
@@ -48,7 +57,7 @@
       .section-title {
         font-size: 24px;
         font-weight: 700;
-        color: #34A853;
+        color: #34a853;
         margin-bottom: 10px;
       }
       .extension-card {
@@ -62,7 +71,7 @@
       .extension-icon {
         width: 50px;
         height: 50px;
-        background-color: #F5F5F5;
+        background-color: #f5f5f5;
         border-radius: 10px;
         display: flex;
         justify-content: center;
@@ -79,7 +88,7 @@
       .extension-title {
         font-size: 18px;
         font-weight: 700;
-        color: #4285F4;
+        color: #4285f4;
         margin-bottom: 3px;
       }
       .extension-desc {
@@ -88,7 +97,7 @@
       }
       .tag {
         display: inline-block;
-        background-color: #FBBC05;
+        background-color: #fbbc05;
         color: white;
         font-size: 12px;
         padding: 2px 8px;
@@ -105,7 +114,7 @@
       .chart-title {
         font-size: 18px;
         font-weight: 700;
-        color: #EA4335;
+        color: #ea4335;
         margin-bottom: 10px;
         text-align: center;
       }
@@ -114,16 +123,20 @@
   <body>
     <div class="slide-container">
       <div class="header">
-        <img src="/home/ubuntu/chrome_edu_project/images/chrome_logo.png" alt="크롬 로고" class="chrome-logo-small">
+        <img
+          src="images/chrome_logo.png"
+          alt="크롬 로고"
+          class="chrome-logo-small"
+        />
         <h1 class="title">중급 단계: 교육자를 위한 확장프로그램</h1>
       </div>
-      
+
       <div class="content-container">
         <div class="left-column">
           <h2 class="section-title">수업 준비 및 자료 관리</h2>
-          
+
           <div class="extension-card">
-            <div class="extension-icon" style="color: #4285F4;">
+            <div class="extension-icon" style="color: #4285f4">
               <i class="fas fa-camera"></i>
             </div>
             <div class="extension-content">
@@ -135,9 +148,9 @@
               </div>
             </div>
           </div>
-          
+
           <div class="extension-card">
-            <div class="extension-icon" style="color: #FBBC05;">
+            <div class="extension-icon" style="color: #fbbc05">
               <i class="fas fa-sticky-note"></i>
             </div>
             <div class="extension-content">
@@ -149,11 +162,11 @@
               </div>
             </div>
           </div>
-          
+
           <h2 class="section-title mt-4">온라인 수업 지원</h2>
-          
+
           <div class="extension-card">
-            <div class="extension-icon" style="color: #EA4335;">
+            <div class="extension-icon" style="color: #ea4335">
               <i class="fas fa-video"></i>
             </div>
             <div class="extension-content">
@@ -165,9 +178,9 @@
               </div>
             </div>
           </div>
-          
+
           <div class="extension-card">
-            <div class="extension-icon" style="color: #34A853;">
+            <div class="extension-icon" style="color: #34a853">
               <i class="fas fa-microphone"></i>
             </div>
             <div class="extension-content">
@@ -180,21 +193,32 @@
             </div>
           </div>
         </div>
-        
+
         <div class="right-column">
-          <div style="margin-bottom: 15px;">
-            <img src="/home/ubuntu/chrome_edu_project/images/chrome_extensions.png" alt="크롬 확장프로그램" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px;">
+          <div style="margin-bottom: 15px">
+            <img
+              src="/home/ubuntu/chrome_edu_project/images/chrome_extensions.png"
+              alt="크롬 확장프로그램"
+              style="
+                width: 100%;
+                max-height: 220px;
+                object-fit: cover;
+                border-radius: 10px;
+              "
+            />
           </div>
-          
+
           <div class="chart-container">
-            <h3 class="chart-title">교사들이 가장 많이 사용하는 확장프로그램</h3>
-            <div style="height: 180px;">
+            <h3 class="chart-title">
+              교사들이 가장 많이 사용하는 확장프로그램
+            </h3>
+            <div style="height: 180px">
               <canvas id="extensionChart"></canvas>
             </div>
           </div>
-          
+
           <div class="extension-card">
-            <div class="extension-icon" style="color: #4285F4;">
+            <div class="extension-icon" style="color: #4285f4">
               <i class="fas fa-robot"></i>
             </div>
             <div class="extension-content">
@@ -207,34 +231,48 @@
               </div>
             </div>
           </div>
-          
+
           <div class="mt-3 p-3 bg-blue-100 rounded-lg">
-            <p class="font-bold text-blue-800"><i class="fas fa-lightbulb mr-2"></i>교사 팁</p>
-            <p class="text-sm">확장프로그램은 크롬 웹 스토어에서 무료로 설치할 수 있습니다. 프로필별로 다른 확장프로그램을 설정하면 용도에 맞게 브라우저를 최적화할 수 있습니다.</p>
+            <p class="font-bold text-blue-800">
+              <i class="fas fa-lightbulb mr-2"></i>교사 팁
+            </p>
+            <p class="text-sm">
+              확장프로그램은 크롬 웹 스토어에서 무료로 설치할 수 있습니다.
+              프로필별로 다른 확장프로그램을 설정하면 용도에 맞게 브라우저를
+              최적화할 수 있습니다.
+            </p>
           </div>
         </div>
       </div>
     </div>
-    
+
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('extensionChart').getContext('2d');
+      document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('extensionChart').getContext('2d')
         const extensionChart = new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: ['Fireshot', 'Google Keep', 'Video Speed', 'Mote', 'Brisk Teaching'],
-            datasets: [{
-              label: '사용 빈도(%)',
-              data: [78, 65, 60, 55, 45],
-              backgroundColor: [
-                '#4285F4',
-                '#FBBC05',
-                '#EA4335',
-                '#34A853',
-                '#4285F4'
-              ],
-              borderWidth: 0
-            }]
+            labels: [
+              'Fireshot',
+              'Google Keep',
+              'Video Speed',
+              'Mote',
+              'Brisk Teaching',
+            ],
+            datasets: [
+              {
+                label: '사용 빈도(%)',
+                data: [78, 65, 60, 55, 45],
+                backgroundColor: [
+                  '#4285F4',
+                  '#FBBC05',
+                  '#EA4335',
+                  '#34A853',
+                  '#4285F4',
+                ],
+                borderWidth: 0,
+              },
+            ],
           },
           options: {
             responsive: true,
@@ -242,18 +280,17 @@
             scales: {
               y: {
                 beginAtZero: true,
-                max: 100
-              }
+                max: 100,
+              },
             },
             plugins: {
               legend: {
-                display: false
-              }
-            }
-          }
-        });
-      });
+                display: false,
+              },
+            },
+          },
+        })
+      })
     </script>
   </body>
 </html>
-

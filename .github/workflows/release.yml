@@ -5,124 +5,63 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wkhtmltopdf pandoc zip
-        
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install markdown weasyprint reportlab
-        
-    - name: Generate materials
-      run: |
-        echo "🚀 Generating materials for release..."
-        
-        # 출력 디렉토리 생성
-        mkdir -p output
-        
-        # 슬라이드 및 자료 생성
-        python scripts/generate_slides.py
-        bash scripts/generate_materials.sh
-        
-        # PDF 생성 (워크북이 있는 경우)
-        if [ -f "docs/chrome_edu_workbook.md" ]; then
-          pandoc docs/chrome_edu_workbook.md -o output/chrome_edu_workbook.pdf \
-            --pdf-engine=wkhtmltopdf \
-            -V margin-top=20mm \
-            -V margin-bottom=20mm \
-            -V margin-left=15mm \
-            -V margin-right=15mm
-        fi
-        
-        echo "✅ Material generation completed"
-        
-    - name: Create release package
-      run: |
-        echo "📦 Creating release package..."
-        
-        # 릴리스 패키지 디렉토리 생성
-        mkdir -p release-package
-        
-        # 주요 파일들을 릴리스 패키지에 복사
-        cp -r output/* release-package/
-        cp -r docs release-package/
-        cp README.md release-package/
-        cp -r scripts release-package/
-        
-        # 압축 파일 생성
-        cd release-package
-        zip -r ../chrome-education-materials-${{ github.ref_name }}.zip .
-        cd ..
-        
-        # 개별 파일들도 준비
-        cp output/chrome_edu_workbook.pdf chrome-education-workbook-${{ github.ref_name }}.pdf 2>/dev/null || true
-        cp output/index.html chrome-education-slides-${{ github.ref_name }}.html 2>/dev/null || true
-        
-        echo "✅ Release package created"
-        
-    - name: Get release info
-      id: release_info
-      run: |
-        # 태그에서 버전 정보 추출
-        VERSION=${GITHUB_REF#refs/tags/}
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        
-        # 릴리스 노트 생성
-        cat > release_notes.md << EOF
-        # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 $VERSION
-        
-        ## 📚 포함된 자료
-        
-        - **슬라이드 프레젠테이션**: 기초부터 고급까지 단계별 교육 슬라이드
-        - **실습 워크북**: 실제 상황 기반 실습 가이드 (PDF)
-        - **교육 자료**: 조사 자료 및 커리큘럼 설계 문서
-        - **자동화 스크립트**: 교육 자료 생성 및 관리 도구
-        
-        ## 🚀 사용 방법
-        
-        1. **전체 패키지 다운로드**: \`chrome-education-materials-$VERSION.zip\`
-        2. **개별 파일 다운로드**: 필요한 파일만 선택적으로 다운로드
-        3. **온라인 버전**: [GitHub Pages에서 바로 보기](https://linuxsw.github.io/chrome_lecture_for_korean_teacher/)
-        
-        ## 📖 문서
-        
-        자세한 사용법은 [README.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/README.md)를 참조하세요.
-        
-        ## 🔄 자동 업데이트
-        
-        이 자료는 GitHub Actions를 통해 자동으로 생성되었습니다. 
-        소스 코드가 업데이트되면 자동으로 새로운 버전이 생성됩니다.
-        EOF
-        
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        name: Chrome Education Materials ${{ steps.release_info.outputs.version }}
-        body_path: release_notes.md
-        files: |
-          chrome-education-materials-${{ github.ref_name }}.zip
-          chrome-education-workbook-${{ github.ref_name }}.pdf
-          chrome-education-slides-${{ github.ref_name }}.html
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc weasyprint xelatex fonts-noto-cjk
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install markdown weasyprint python-pptx
+
+      - name: Generate materials
+        run: |
+          bash scripts/generate_materials.sh
+          python scripts/generate_slides.py
+
+      - name: Create release package
+        run: |
+          mkdir -p release-package
+          cp -r output/* release-package/
+          cp README.md release-package/
+          cp docs/*.md release-package/
+          zip -r chrome-education-materials-${{ github.ref_name }}.zip release-package/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            chrome-education-materials-${{ github.ref_name }}.zip
+            output/chrome_edu_workbook.pdf
+          body: |
+            ## 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 ${{ github.ref_name }}
+
+            ### 포함된 자료
+            - 📊 슬라이드 프레젠테이션 (HTML)
+            - 📚 실습 워크북 (PDF)
+            - 🎯 교육 자료 및 참고 문서
+
+            ### 사용 방법
+            1. `chrome-education-materials-${{ github.ref_name }}.zip` 파일을 다운로드하여 압축 해제
+            2. `index.html` 파일을 브라우저에서 열어 슬라이드 확인
+            3. `chrome_edu_workbook.pdf` 파일로 실습 진행
+
+            ### 온라인 버전
+            - 웹 슬라이드: https://linuxsw.github.io/chrome_lecture_for_korean_teacher/
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

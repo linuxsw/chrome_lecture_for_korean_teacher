@@ -14,8 +14,10 @@ DOCS_DIR="$PROJECT_DIR/docs"
 OUTPUT_DIR="$PROJECT_DIR/output"
 ASSETS_DIR="$PROJECT_DIR/assets"
 
-# 출력 디렉토리 생성
+# 출력 디렉토리 초기화
+rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
+echo "🗑️  출력 디렉토리 초기화 완료"
 
 echo "📁 프로젝트 디렉토리: $PROJECT_DIR"
 
@@ -88,7 +90,7 @@ for i in "${!SLIDE_FILES[@]}"; do
             <div class="slide-card bg-white rounded-lg shadow-md p-6 hover:shadow-lg">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">${SLIDE_TITLES[$i]}</h3>
                 <p class="text-gray-600 mb-4">슬라이드 $(($i + 1))</p>
-                <a href="../slides/${SLIDE_FILES[$i]}" target="_blank" 
+                <a href="$(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]}" target="_blank" 
                    class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
                     보기
                 </a>
@@ -123,32 +125,100 @@ EOF
 
 echo "✅ 슬라이드 인덱스 생성 완료"
 
-# 3. 워크북 PDF 생성 (이미 존재하는 경우 스킵)
+# 3. 워크북 PDF 생성 (한글 지원 개선)
 if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     echo "📚 워크북 PDF 생성 중..."
-    if command -v manus-md-to-pdf &> /dev/null; then
+    
+    # weasyprint 우선 시도 (한글 지원 우수)
+    if command -v weasyprint &> /dev/null; then
+        echo "🔧 weasyprint를 사용하여 PDF 생성 중..."
+        # 먼저 markdown을 HTML로 변환
+        if command -v pandoc &> /dev/null; then
+            pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.html" \
+                --standalone \
+                --css=https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700 \
+                --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
+            
+            # HTML을 PDF로 변환 (한글 폰트 지원)
+            weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/chrome_edu_workbook.pdf"
+            rm "$OUTPUT_DIR/chrome_edu_workbook.html"  # 임시 HTML 파일 삭제
+            echo "✅ weasyprint로 워크북 PDF 생성 완료"
+        else
+            echo "⚠️  pandoc을 찾을 수 없습니다."
+        fi
+    # pandoc 단독 사용 (두 번째 옵션)
+    elif command -v pandoc &> /dev/null; then
+        echo "🔧 pandoc을 사용하여 PDF 생성 중..."
+        pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.pdf" \
+            --pdf-engine=xelatex \
+            --variable mainfont="Noto Sans CJK KR" \
+            --variable sansfont="Noto Sans CJK KR" \
+            --variable monofont="Noto Sans Mono CJK KR" \
+            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
+        echo "✅ pandoc으로 워크북 PDF 생성 완료"
+    # manus-md-to-pdf 사용 (세 번째 옵션)
+    elif command -v manus-md-to-pdf &> /dev/null; then
+        echo "🔧 manus-md-to-pdf를 사용하여 PDF 생성 중..."
         manus-md-to-pdf "$DOCS_DIR/chrome_edu_workbook.md" "$OUTPUT_DIR/chrome_edu_workbook.pdf"
-        echo "✅ 워크북 PDF 생성 완료"
+        echo "✅ manus-md-to-pdf로 워크북 PDF 생성 완료"
     else
-        echo "⚠️  manus-md-to-pdf를 찾을 수 없습니다. 기존 PDF를 복사합니다."
+        echo "⚠️  PDF 생성 도구를 찾을 수 없습니다. 기존 PDF를 복사합니다."
         if [[ -f "$DOCS_DIR/chrome_edu_workbook.pdf" ]]; then
             cp "$DOCS_DIR/chrome_edu_workbook.pdf" "$OUTPUT_DIR/"
+            echo "✅ 기존 PDF 파일 복사 완료"
+        else
+            echo "❌ 기존 PDF 파일도 찾을 수 없습니다."
         fi
     fi
 fi
 
-# 4. 슬라이드 파일들을 output 디렉토리로 복사
-echo "📋 슬라이드 파일 복사 중..."
-cp -r "$SLIDES_DIR"/* "$OUTPUT_DIR/"
+# 4. PPTX 프레젠테이션 생성
+echo "📊 PowerPoint 프레젠테이션 생성 중..."
+if command -v python3 &> /dev/null; then
+    python3 "$PROJECT_DIR/scripts/generate_pptx.py"
+    if [[ $? -eq 0 ]]; then
+        echo "✅ PowerPoint 프레젠테이션 생성 완료"
+    else
+        echo "⚠️  PowerPoint 생성 중 오류 발생"
+    fi
+else
+    echo "⚠️  Python3를 찾을 수 없습니다. PPTX 생성을 건너뜁니다."
+fi
 
-# 5. 빌드 정보 생성
+# 5. 슬라이드 파일들을 순서대로 output 디렉토리로 복사
+echo "📋 슬라이드 파일 복사 중..."
+for i in "${!SLIDE_FILES[@]}"; do
+    src="$SLIDES_DIR/${SLIDE_FILES[$i]}"
+    dst="$OUTPUT_DIR/$(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]}"
+    cp "$src" "$dst"
+    echo "  📄 $(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]} 복사 완료"
+done
+
+# 이미지 폴더도 복사
+if [[ -d "$SLIDES_DIR/images" ]]; then
+    cp -r "$SLIDES_DIR/images" "$OUTPUT_DIR/"
+    echo "  🖼️  이미지 폴더 복사 완료"
+fi
+
+# 문서 파일들도 복사 (링크 연결을 위해)
+if [[ -d "$DOCS_DIR" ]]; then
+    echo "📄 문서 파일 복사 중..."
+    cp "$DOCS_DIR"/*.md "$OUTPUT_DIR/" 2>/dev/null || echo "⚠️  .md 파일을 찾을 수 없습니다."
+fi
+
+# 6. 빌드 정보 생성
+echo "📄 메인 인덱스 페이지 생성 중..."
+python3 "$PROJECT_DIR/scripts/generate_slides.py"
+
 echo "ℹ️  빌드 정보 생성 중..."
 cat > "$OUTPUT_DIR/build_info.json" << EOF
 {
     "build_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+    "build_date_formatted": "$(date +"%Y년 %m월 %d일 %H:%M")",
     "build_version": "1.0.0",
     "slides_count": ${#SLIDE_FILES[@]},
     "generated_files": [
+        "index.html",
         "slides_index.html",
         "chrome_edu_workbook.pdf",
         $(printf '"%s",' "${SLIDE_FILES[@]}" | sed 's/,$//')
@@ -160,7 +230,7 @@ echo "🎉 교육 자료 생성 완료!"
 echo "📂 결과물 위치: $OUTPUT_DIR"
 echo "🌐 슬라이드 인덱스: $OUTPUT_DIR/slides_index.html"
 
-# 6. 생성된 파일 목록 출력
+# 7. 생성된 파일 목록 출력
 echo ""
 echo "📋 생성된 파일 목록:"
 ls -la "$OUTPUT_DIR"

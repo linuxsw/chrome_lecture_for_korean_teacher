@@ -4,11 +4,43 @@ Chrome Education Slides Generator
 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 슬라이드 생성기
 """
 
-import os
 import json
 import shutil
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import markdown
+
+
+def convert_markdown_to_html(md_content):
+    """마크다운을 HTML로 변환"""
+    html = markdown.markdown(md_content, extensions=['extra', 'codehilite'])
+    return f'''<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문서</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {{ font-family: 'Noto Sans KR', sans-serif; }}
+        .markdown-body {{ max-width: 800px; margin: 2rem auto; padding: 2rem; }}
+        .markdown-body h1 {{ font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }}
+        .markdown-body h2 {{ font-size: 1.5rem; font-weight: bold; margin-top: 2rem; margin-bottom: 1rem; }}
+        .markdown-body p {{ margin-bottom: 1rem; line-height: 1.6; }}
+        .markdown-body ul {{ list-style-type: disc; margin-left: 2rem; margin-bottom: 1rem; }}
+        .markdown-body code {{ background-color: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem; }}
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="markdown-body bg-white rounded-lg shadow-lg">
+        {html}
+    </div>
+</body>
+</html>'''
+
+
 
 class ChromeEducationSlidesGenerator:
     def __init__(self, project_dir=None):
@@ -190,9 +222,32 @@ class ChromeEducationSlidesGenerator:
                 shutil.copytree(images_dir, output_images_dir)
                 print("  ✅ 이미지 디렉토리 복사 완료")
     
+    def convert_markdown_files(self):
+        """마크다운 파일들을 HTML로 변환"""
+        docs_dir = self.project_dir / "docs"
+        if docs_dir.exists():
+            print("📄 마크다운 파일 HTML 변환 중...")
+            
+            for md_file in docs_dir.glob("*.md"):
+                try:
+                    with open(md_file, 'r', encoding='utf-8') as f:
+                        md_content = f.read()
+                    
+                    html_content = convert_markdown_to_html(md_content)
+                    html_file = self.output_dir / f"{md_file.stem}.html"
+                    
+                    with open(html_file, 'w', encoding='utf-8') as f:
+                        f.write(html_content)
+                    
+                    print(f"  ✅ {md_file.name} → {html_file.name} 변환 완료")
+                except Exception as e:
+                    print(f"  ⚠️ {md_file.name} 변환 실패: {e}")
+    
     def generate_presentation_index(self):
         """프레젠테이션 인덱스 HTML 생성"""
         config = self.get_slide_config()
+        
+        current_date = datetime.now().strftime("%Y년 %m월 %d일 %H:%M")
         
         html_content = f'''<!DOCTYPE html>
 <html lang="ko">
@@ -262,7 +317,7 @@ class ChromeEducationSlidesGenerator:
                     <h3 class="text-lg font-bold text-gray-800 mb-3">{slide["title"]}</h3>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-500 capitalize">{slide["type"]}</span>
-                        <a href="{slide["id"]}.html" target="_blank" 
+                        <a href="{i+1:02d}_{slide["id"]}.html" target="_blank" 
                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors inline-flex items-center">
                             <i class="fas fa-eye mr-2"></i>보기
                         </a>
@@ -271,7 +326,7 @@ class ChromeEducationSlidesGenerator:
             </div>
 '''
         
-        html_content += '''
+        html_content += f'''
         </div>
         
         <!-- 추가 자료 섹션 -->
@@ -280,30 +335,33 @@ class ChromeEducationSlidesGenerator:
                 <i class="fas fa-book-open mr-3 text-blue-500"></i>추가 자료
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="../docs/chrome_edu_workbook.pdf" target="_blank" 
-                   class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105">
+                <a href="chrome_edu_workbook.pdf" target="_blank" 
+                   class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-lg hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg">
                     <div class="text-center">
-                        <i class="fas fa-file-pdf text-3xl mb-3"></i>
-                        <h3 class="font-bold text-lg mb-2">실습 워크북</h3>
+                        <i class="fas fa-file-pdf text-4xl mb-4"></i>
+                        <h3 class="font-bold text-xl mb-2">실습 워크북</h3>
                         <p class="text-sm opacity-90">단계별 실습 가이드 (PDF)</p>
+                        <div class="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1">PDF 파일</div>
                     </div>
                 </a>
                 
-                <a href="../docs/chrome_education_research.md" target="_blank" 
-                   class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                <a href="chrome_education_research.html" target="_blank" 
+                   class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 shadow-lg">
                     <div class="text-center">
-                        <i class="fas fa-search text-3xl mb-3"></i>
-                        <h3 class="font-bold text-lg mb-2">조사 자료</h3>
-                        <p class="text-sm opacity-90">교육 도구 조사 및 분석</p>
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <h3 class="font-bold text-xl mb-2">교육 도구 조사</h3>
+                        <p class="text-sm opacity-90">크롬 브라우저 교육 도구 분석</p>
+                        <div class="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1">HTML 문서</div>
                     </div>
                 </a>
                 
-                <a href="../docs/curriculum_design.md" target="_blank" 
-                   class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all transform hover:scale-105">
+                <a href="curriculum_design.html" target="_blank" 
+                   class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
                     <div class="text-center">
-                        <i class="fas fa-graduation-cap text-3xl mb-3"></i>
-                        <h3 class="font-bold text-lg mb-2">커리큘럼 설계</h3>
-                        <p class="text-sm opacity-90">교육 과정 설계 문서</p>
+                        <i class="fas fa-chalkboard-teacher text-4xl mb-4"></i>
+                        <h3 class="font-bold text-xl mb-2">커리큘럼 설계</h3>
+                        <p class="text-sm opacity-90">체계적인 교육 과정 설계</p>
+                        <div class="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1">HTML 문서</div>
                     </div>
                 </a>
             </div>
@@ -313,7 +371,7 @@ class ChromeEducationSlidesGenerator:
         <div class="text-center mt-12 text-gray-600">
             <p class="mb-2">
                 <i class="fas fa-calendar-alt mr-2"></i>
-                생성일: {datetime.now().strftime("%Y년 %m월 %d일")}
+                생성일: {current_date}
             </p>
             <p>
                 <i class="fas fa-heart text-red-500 mr-2"></i>
@@ -335,8 +393,10 @@ class ChromeEducationSlidesGenerator:
         """빌드 정보 파일 생성"""
         config = self.get_slide_config()
         
+        current_date = datetime.now()
         build_info = {
-            "build_date": datetime.now().isoformat(),
+            "build_date": current_date.isoformat(),
+            "build_date_formatted": current_date.strftime("%Y년 %m월 %d일 %H:%M"),
             "build_version": "1.0.0",
             "title": config["title"],
             "subtitle": config["subtitle"],
@@ -367,10 +427,13 @@ class ChromeEducationSlidesGenerator:
         # 2. 기존 슬라이드 파일 복사
         self.copy_existing_slides()
         
-        # 3. 프레젠테이션 인덱스 생성
+        # 3. 마크다운 파일들을 HTML로 변환
+        self.convert_markdown_files()
+        
+        # 4. 프레젠테이션 인덱스 생성
         self.generate_presentation_index()
         
-        # 4. 빌드 정보 생성
+        # 5. 빌드 정보 생성
         self.generate_build_info()
         
         # 5. 결과 출력
