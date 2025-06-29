@@ -1,4 +1,4 @@
-name: Create Enhanced Release
+name: Create Release
 
 on:
   push:
@@ -11,238 +11,240 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wkhtmltopdf pandoc zip bc
-        # 한글 폰트 설치 (PDF 한글 지원)
-        sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
-        sudo fc-cache -fv
-        echo "✅ System dependencies installed"
-        
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install python-pptx pillow weasyprint markdown reportlab
-        echo "✅ Python dependencies installed"
-        
-    - name: Generate enhanced materials
-      run: |
-        echo "🚀 Generating enhanced materials for release..."
-        
-        # 향상된 자료 생성 스크립트 실행
-        bash scripts/generate_materials_enhanced.sh
-        
-        echo "✅ Enhanced material generation completed"
-        
-    - name: Verify generated files
-      run: |
-        echo "📋 Verifying generated files for release:"
-        echo "----------------------------------------"
-        
-        # 필수 파일들 확인
-        REQUIRED_FILES=(
-          "output/index.html"
-          "output/chrome_education_slides.pptx"
-        )
-        
-        OPTIONAL_FILES=(
-          "output/chrome_edu_workbook.pdf"
-        )
-        
-        ALL_GOOD=true
-        
-        for file in "${REQUIRED_FILES[@]}"; do
-          if [ -f "$file" ]; then
-            size=$(stat -c%s "$file")
-            echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
-          else
-            echo "❌ $(basename $file): Missing (REQUIRED)"
-            ALL_GOOD=false
-          fi
-        done
-        
-        for file in "${OPTIONAL_FILES[@]}"; do
-          if [ -f "$file" ]; then
-            size=$(stat -c%s "$file")
-            echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
-          else
-            echo "⚠️ $(basename $file): Missing (optional)"
-          fi
-        done
-        
-        if [ "$ALL_GOOD" = false ]; then
-          echo "❌ Required files are missing. Release cannot proceed."
-          exit 1
-        fi
-        
-        echo "----------------------------------------"
-        
-    - name: Create release package
-      run: |
-        echo "📦 Creating enhanced release package..."
-        
-        # 릴리스 패키지 디렉토리 생성
-        mkdir -p release-package
-        
-        # 주요 파일들을 릴리스 패키지에 복사
-        cp -r output/* release-package/
-        
-        # 문서 및 스크립트 포함
-        [ -d docs ] && cp -r docs release-package/
-        cp README.md release-package/ 2>/dev/null || echo "README.md not found"
-        cp -r scripts release-package/
-        cp -r .github release-package/
-        
-        # 압축 파일 생성
-        cd release-package
-        zip -r ../chrome-education-materials-${{ github.ref_name }}.zip .
-        cd ..
-        
-        # 개별 파일들도 준비 (버전 태그 포함)
-        if [ -f "output/chrome_edu_workbook.pdf" ]; then
-          cp output/chrome_edu_workbook.pdf chrome-education-workbook-${{ github.ref_name }}.pdf
-        fi
-        
-        if [ -f "output/index.html" ]; then
-          cp output/index.html chrome-education-slides-${{ github.ref_name }}.html
-        fi
-        
-        if [ -f "output/chrome_education_slides.pptx" ]; then
-          cp output/chrome_education_slides.pptx chrome-education-slides-${{ github.ref_name }}.pptx
-        fi
-        
-        echo "✅ Enhanced release package created"
-        
-    - name: Get release info
-      id: release_info
-      run: |
-        # 태그에서 버전 정보 추출
-        VERSION=${GITHUB_REF#refs/tags/}
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        
-        # 파일 크기 정보 수집
-        PPTX_SIZE=""
-        PDF_SIZE=""
-        HTML_SIZE=""
-        
-        if [ -f "output/chrome_education_slides.pptx" ]; then
-          size=$(stat -c%s "output/chrome_education_slides.pptx")
-          PPTX_SIZE="$(echo "scale=1; $size / 1024 / 1024" | bc -l) MB"
-        fi
-        
-        if [ -f "output/chrome_edu_workbook.pdf" ]; then
-          size=$(stat -c%s "output/chrome_edu_workbook.pdf")
-          PDF_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"
-        fi
-        
-        if [ -f "output/index.html" ]; then
-          size=$(stat -c%s "output/index.html")
-          HTML_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"
-        fi
-        
-        # 릴리스 노트 생성
-        cat > release_notes.md << EOF
-        # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 $VERSION
-        
-        ## 🎯 주요 특징
-        
-        - **시각적 완성도**: 배경 이미지, 아이콘, 그래픽이 포함된 고품질 슬라이드
-        - **다양한 형식**: HTML, PowerPoint, PDF 형식으로 제공
-        - **한글 지원**: 모든 파일에서 한글 폰트 정상 표시
-        - **실습 중심**: 한글학교 현장에 바로 적용 가능한 실용적 내용
-        - **자동 생성**: GitHub Actions로 자동 빌드 및 배포
-        
-        ## 📚 포함된 자료
-        
-        ### 🎨 프레젠테이션 슬라이드 (10개)
-        - **HTML 슬라이드**: 온라인 프레젠테이션용 ${HTML_SIZE:+($HTML_SIZE)}
-        - **PowerPoint 파일**: 오프라인 프레젠테이션용 ${PPTX_SIZE:+($PPTX_SIZE)}
-        
-        ### 📖 실습 워크북
-        - **PDF 워크북**: 단계별 실습 가이드 ${PDF_SIZE:+($PDF_SIZE)}
-        
-        ### 🛠️ 개발 도구
-        - **자동화 스크립트**: 교육 자료 생성 및 관리 도구
-        - **GitHub Actions**: 자동 빌드 및 배포 워크플로우
-        
-        ## 🚀 사용 방법
-        
-        ### 1. 전체 패키지 다운로드
-        \`chrome-education-materials-$VERSION.zip\` - 모든 파일 포함
-        
-        ### 2. 개별 파일 다운로드
-        - **PowerPoint**: \`chrome-education-slides-$VERSION.pptx\`
-        - **PDF 워크북**: \`chrome-education-workbook-$VERSION.pdf\`
-        - **HTML 슬라이드**: \`chrome-education-slides-$VERSION.html\`
-        
-        ### 3. 온라인 버전
-        [GitHub Pages에서 바로 보기](https://linuxsw.github.io/chrome_lecture_for_korean_teacher/)
-        
-        ## 📋 슬라이드 구성
-        
-        1. **타이틀 슬라이드** - 교육 프로그램 소개
-        2. **강의 개요** - 교육 목표 및 단계별 구성
-        3. **기초 단계** - 크롬 브라우저 기본 기능
-        4. **중급 단계 1** - 교육자용 확장프로그램
-        5. **중급 단계 2** - 한글교육 특화 웹도구
-        6. **고급 단계 1** - 구글 워크스페이스 연동
-        7. **고급 단계 2** - AI 도구 활용
-        8. **실습 시나리오** - 단계별 실습 가이드
-        9. **추가 자료** - 참고 링크 및 학습 자료
-        10. **연락처** - 문의 및 지원 정보
-        
-        ## 💡 활용 팁
-        
-        ### 교육 현장에서
-        - **프로젝터 연결**: PowerPoint 파일로 직접 프레젠테이션
-        - **인쇄 배포**: PDF 워크북을 인쇄하여 실습 가이드로 활용
-        - **온라인 수업**: HTML 슬라이드를 화면 공유로 진행
-        
-        ### 개인 학습용
-        - **모바일 학습**: 스마트폰/태블릿에서 PDF 워크북 활용
-        - **반복 학습**: 온라인 버전으로 언제든지 복습
-        - **맞춤 수정**: PowerPoint 파일을 수정하여 개인화
-        
-        ## 📖 문서
-        
-        자세한 사용법과 설치 가이드는 다음 문서를 참조하세요:
-        - [README.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/README.md)
-        - [INSTALL.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/INSTALL.md)
-        - [CONTRIBUTING.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/CONTRIBUTING.md)
-        
-        ## 🔄 자동 업데이트
-        
-        이 자료는 GitHub Actions를 통해 자동으로 생성되었습니다. 
-        소스 코드가 업데이트되면 자동으로 새로운 버전이 생성됩니다.
-        
-        ## 🙏 감사의 말
-        
-        한글교육의 디지털 혁신을 함께 만들어가는 모든 선생님들께 감사드립니다!
-        EOF
-        
-    - name: Create Enhanced Release
-      uses: softprops/action-gh-release@v2
-      with:
-        name: Chrome Education Materials ${{ steps.release_info.outputs.version }}
-        body_path: release_notes.md
-        files: |
-          chrome-education-materials-${{ github.ref_name }}.zip
-          chrome-education-workbook-${{ github.ref_name }}.pdf
-          chrome-education-slides-${{ github.ref_name }}.html
-          chrome-education-slides-${{ github.ref_name }}.pptx
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wkhtmltopdf pandoc zip bc
+          # 한글 폰트 설치 (PDF 한글 지원)
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+          sudo fc-cache -fv
+          echo "✅ System dependencies installed"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install python-pptx pillow weasyprint markdown reportlab
+          echo "✅ Python dependencies installed"
+
+      - name: Generate materials
+        run: |
+          echo "🚀 Generating materials for release..."
+
+          # Python 스크립트 실행
+          python scripts/generate_slides.py
+
+          # Bash 스크립트 실행
+          bash scripts/generate_materials.sh
+
+          echo "✅ Material generation completed"
+
+      - name: Verify generated files
+        run: |
+          echo "📋 Verifying generated files for release:"
+          echo "----------------------------------------"
+
+          # 필수 파일들 확인
+          REQUIRED_FILES=(
+            "output/index.html"
+            "output/chrome_education_slides.pptx"
+          )
+
+          OPTIONAL_FILES=(
+            "output/chrome_edu_workbook.pdf"
+          )
+
+          ALL_GOOD=true
+
+          for file in "${REQUIRED_FILES[@]}"; do
+            if [ -f "$file" ]; then
+              size=$(stat -c%s "$file")
+              echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
+            else
+              echo "❌ $(basename $file): Missing (REQUIRED)"
+              ALL_GOOD=false
+            fi
+          done
+
+          for file in "${OPTIONAL_FILES[@]}"; do
+            if [ -f "$file" ]; then
+              size=$(stat -c%s "$file")
+              echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
+            else
+              echo "⚠️ $(basename $file): Missing (optional)"
+            fi
+          done
+
+          if [ "$ALL_GOOD" = false ]; then
+            echo "❌ Required files are missing. Release cannot proceed."
+            exit 1
+          fi
+
+          echo "----------------------------------------"
+
+      - name: Create release package
+        run: |
+          echo "📦 Creating enhanced release package..."
+
+          # 릴리스 패키지 디렉토리 생성
+          mkdir -p release-package
+
+          # 주요 파일들을 릴리스 패키지에 복사
+          cp -r output/* release-package/
+
+          # 문서 및 스크립트 포함
+          [ -d docs ] && cp -r docs release-package/
+          cp README.md release-package/ 2>/dev/null || echo "README.md not found"
+          cp -r scripts release-package/
+          cp -r .github release-package/
+
+          # 압축 파일 생성
+          cd release-package
+          zip -r ../chrome-education-materials-${{ github.ref_name }}.zip .
+          cd ..
+
+          # 개별 파일들도 준비 (버전 태그 포함)
+          if [ -f "output/chrome_edu_workbook.pdf" ]; then
+            cp output/chrome_edu_workbook.pdf chrome-education-workbook-${{ github.ref_name }}.pdf
+          fi
+
+          if [ -f "output/index.html" ]; then
+            cp output/index.html chrome-education-slides-${{ github.ref_name }}.html
+          fi
+
+          if [ -f "output/chrome_education_slides.pptx" ]; then
+            cp output/chrome_education_slides.pptx chrome-education-slides-${{ github.ref_name }}.pptx
+          fi
+
+          echo "✅ Enhanced release package created"
+
+      - name: Get release info
+        id: release_info
+        run: |
+          # 태그에서 버전 정보 추출
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          # 파일 크기 정보 수집
+          PPTX_SIZE=""
+          PDF_SIZE=""
+          HTML_SIZE=""
+
+          if [ -f "output/chrome_education_slides.pptx" ]; then
+            size=$(stat -c%s "output/chrome_education_slides.pptx")
+            PPTX_SIZE="$(echo "scale=1; $size / 1024 / 1024" | bc -l) MB"
+          fi
+
+          if [ -f "output/chrome_edu_workbook.pdf" ]; then
+            size=$(stat -c%s "output/chrome_edu_workbook.pdf")
+            PDF_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"
+          fi
+
+          if [ -f "output/index.html" ]; then
+            size=$(stat -c%s "output/index.html")
+            HTML_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"
+          fi
+
+          # 릴리스 노트 생성
+          cat > release_notes.md << EOF
+          # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 $VERSION
+
+          ## 🎯 주요 특징
+
+          - **시각적 완성도**: 배경 이미지, 아이콘, 그래픽이 포함된 고품질 슬라이드
+          - **다양한 형식**: HTML, PowerPoint, PDF 형식으로 제공
+          - **한글 지원**: 모든 파일에서 한글 폰트 정상 표시
+          - **실습 중심**: 한글학교 현장에 바로 적용 가능한 실용적 내용
+          - **자동 생성**: GitHub Actions로 자동 빌드 및 배포
+
+          ## 📚 포함된 자료
+
+          ### 🎨 프레젠테이션 슬라이드 (10개)
+          - **HTML 슬라이드**: 온라인 프레젠테이션용 ${HTML_SIZE:+($HTML_SIZE)}
+          - **PowerPoint 파일**: 오프라인 프레젠테이션용 ${PPTX_SIZE:+($PPTX_SIZE)}
+
+          ### 📖 실습 워크북
+          - **PDF 워크북**: 단계별 실습 가이드 ${PDF_SIZE:+($PDF_SIZE)}
+
+          ### 🛠️ 개발 도구
+          - **자동화 스크립트**: 교육 자료 생성 및 관리 도구
+          - **GitHub Actions**: 자동 빌드 및 배포 워크플로우
+
+          ## 🚀 사용 방법
+
+          ### 1. 전체 패키지 다운로드
+          \`chrome-education-materials-$VERSION.zip\` - 모든 파일 포함
+
+          ### 2. 개별 파일 다운로드
+          - **PowerPoint**: \`chrome-education-slides-$VERSION.pptx\`
+          - **PDF 워크북**: \`chrome-education-workbook-$VERSION.pdf\`
+          - **HTML 슬라이드**: \`chrome-education-slides-$VERSION.html\`
+
+          ### 3. 온라인 버전
+          [GitHub Pages에서 바로 보기](https://linuxsw.github.io/chrome_lecture_for_korean_teacher/)
+
+          ## 📋 슬라이드 구성
+
+          1. **타이틀 슬라이드** - 교육 프로그램 소개
+          2. **강의 개요** - 교육 목표 및 단계별 구성
+          3. **기초 단계** - 크롬 브라우저 기본 기능
+          4. **중급 단계 1** - 교육자용 확장프로그램
+          5. **중급 단계 2** - 한글교육 특화 웹도구
+          6. **고급 단계 1** - 구글 워크스페이스 연동
+          7. **고급 단계 2** - AI 도구 활용
+          8. **실습 시나리오** - 단계별 실습 가이드
+          9. **추가 자료** - 참고 링크 및 학습 자료
+          10. **연락처** - 문의 및 지원 정보
+
+          ## 💡 활용 팁
+
+          ### 교육 현장에서
+          - **프로젝터 연결**: PowerPoint 파일로 직접 프레젠테이션
+          - **인쇄 배포**: PDF 워크북을 인쇄하여 실습 가이드로 활용
+          - **온라인 수업**: HTML 슬라이드를 화면 공유로 진행
+
+          ### 개인 학습용
+          - **모바일 학습**: 스마트폰/태블릿에서 PDF 워크북 활용
+          - **반복 학습**: 온라인 버전으로 언제든지 복습
+          - **맞춤 수정**: PowerPoint 파일을 수정하여 개인화
+
+          ## 📖 문서
+
+          자세한 사용법과 설치 가이드는 다음 문서를 참조하세요:
+          - [README.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/README.md)
+          - [INSTALL.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/INSTALL.md)
+          - [CONTRIBUTING.md](https://github.com/linuxsw/chrome_lecture_for_korean_teacher/blob/main/CONTRIBUTING.md)
+
+          ## 🔄 자동 업데이트
+
+          이 자료는 GitHub Actions를 통해 자동으로 생성되었습니다. 
+          소스 코드가 업데이트되면 자동으로 새로운 버전이 생성됩니다.
+
+          ## 🙏 감사의 말
+
+          한글교육의 디지털 혁신을 함께 만들어가는 모든 선생님들께 감사드립니다!
+          EOF
+
+      - name: Create Enhanced Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Chrome Education Materials ${{ steps.release_info.outputs.version }}
+          body_path: release_notes.md
+          files: |
+            chrome-education-materials-${{ github.ref_name }}.zip
+            chrome-education-workbook-${{ github.ref_name }}.pdf
+            chrome-education-slides-${{ github.ref_name }}.html
+            chrome-education-slides-${{ github.ref_name }}.pptx
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
