@@ -1,4 +1,4 @@
-name: Build and Deploy Chrome Education Materials
+name: Build and Deploy Enhanced Chrome Education Materials
 
 on:
   push:
@@ -33,48 +33,78 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y wkhtmltopdf pandoc
-        # 한글 폰트 설치
+        sudo apt-get install -y wkhtmltopdf pandoc bc
+        # 한글 폰트 설치 (PDF 한글 지원)
         sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
         sudo fc-cache -fv
+        echo "✅ System dependencies installed"
         
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install markdown weasyprint reportlab python-pptx
+        pip install python-pptx pillow weasyprint markdown reportlab
+        echo "✅ Python dependencies installed"
         
-    - name: Create output directory
-      run: mkdir -p output
+    - name: Create directories
+      run: |
+        mkdir -p output docs
+        echo "✅ Directories created"
       
-    - name: Generate slides and materials
+    - name: Generate enhanced materials
       run: |
-        echo "🚀 Starting material generation..."
+        echo "🚀 Starting enhanced material generation..."
         
-        # Python 스크립트 실행
-        python scripts/generate_slides.py
+        # 향상된 자료 생성 스크립트 실행
+        bash scripts/generate_materials_enhanced.sh
         
-        # Bash 스크립트 실행
-        bash scripts/generate_materials.sh
+        echo "✅ Enhanced material generation completed"
         
-        echo "✅ Material generation completed"
-        
-    - name: Generate PDF from Markdown (if workbook exists)
+    - name: Verify generated files
       run: |
-        if [ -f "docs/chrome_edu_workbook.md" ]; then
-          echo "📚 Converting workbook to PDF..."
-          python scripts/generate_pdf.py
-          echo "✅ PDF conversion completed"
+        echo "📋 Generated files verification:"
+        echo "----------------------------------------"
+        
+        if [ -f "output/index.html" ]; then
+          size=$(stat -c%s "output/index.html")
+          echo "✅ HTML Index: $(printf "%'d" $size) bytes"
+        else
+          echo "❌ HTML Index: Missing"
         fi
         
-    - name: Generate PowerPoint presentation
-      run: |
-        echo "📊 Creating PowerPoint presentation..."
-        python scripts/generate_pptx.py
-        echo "✅ PowerPoint generation completed"
+        if [ -f "output/chrome_education_slides.pptx" ]; then
+          size=$(stat -c%s "output/chrome_education_slides.pptx")
+          mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
+          echo "✅ PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
+        else
+          echo "❌ PowerPoint: Missing"
+        fi
         
-    - name: List generated files
-      run: |
-        echo "📋 Generated files:"
+        if [ -f "output/chrome_edu_workbook.pdf" ]; then
+          size=$(stat -c%s "output/chrome_edu_workbook.pdf")
+          kb=$(echo "scale=1; $size / 1024" | bc -l)
+          echo "✅ PDF Workbook: $(printf "%'d" $size) bytes (${kb} KB)"
+        else
+          echo "⚠️ PDF Workbook: Missing (optional)"
+        fi
+        
+        # HTML 슬라이드 파일들 개수
+        html_count=$(find output -name "*.html" -not -name "index.html" | wc -l)
+        echo "✅ HTML Slides: ${html_count} files"
+        
+        # Assets 확인
+        if [ -d "output/assets" ]; then
+          asset_count=$(find output/assets -type f | wc -l)
+          echo "✅ Assets: ${asset_count} files"
+        fi
+        
+        # 이미지 확인
+        if [ -d "output/images" ]; then
+          image_count=$(find output/images -type f | wc -l)
+          echo "✅ Images: ${image_count} files"
+        fi
+        
+        echo "----------------------------------------"
+        echo "📂 Complete file listing:"
         ls -la output/
         
     - name: Setup Pages
