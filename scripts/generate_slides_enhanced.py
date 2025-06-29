@@ -21,7 +21,19 @@ class EnhancedChromeEducationSlidesGenerator:
         self.src_dir = self.project_dir / "src"
         
         # 기존 슬라이드 디렉토리 (원본 HTML 슬라이드들)
-        self.original_slides_dir = Path("/home/ubuntu/chrome_edu_project")
+        # GitHub Actions 환경에서는 상대 경로 사용
+        possible_slides_dirs = [
+            Path("/home/ubuntu/chrome_edu_project"),  # 로컬 환경
+            self.project_dir / "chrome_edu_project",   # 프로젝트 내부
+            self.project_dir / "slides",               # slides 디렉토리
+            self.project_dir / "src" / "slides"        # src/slides 디렉토리
+        ]
+        
+        self.original_slides_dir = None
+        for slides_dir in possible_slides_dirs:
+            if slides_dir.exists():
+                self.original_slides_dir = slides_dir
+                break
         
         # 디렉토리 생성
         self.output_dir.mkdir(exist_ok=True)
@@ -31,15 +43,15 @@ class EnhancedChromeEducationSlidesGenerator:
         """기존 HTML 슬라이드 파일들을 output 디렉토리로 복사"""
         print("📋 기존 HTML 슬라이드 파일 복사 중...")
         
-        if not self.original_slides_dir.exists():
-            print(f"  ⚠️ 원본 슬라이드 디렉토리를 찾을 수 없습니다: {self.original_slides_dir}")
-            return False
+        if self.original_slides_dir is None:
+            print(f"  ⚠️ 원본 슬라이드 디렉토리를 찾을 수 없습니다. 기본 슬라이드를 생성합니다.")
+            return self.create_default_slides()
         
         # HTML 파일들 복사
         html_files = list(self.original_slides_dir.glob("*.html"))
         if not html_files:
             print(f"  ⚠️ HTML 파일을 찾을 수 없습니다: {self.original_slides_dir}")
-            return False
+            return self.create_default_slides()
         
         for html_file in html_files:
             dest_file = self.output_dir / html_file.name
@@ -54,6 +66,71 @@ class EnhancedChromeEducationSlidesGenerator:
                 shutil.rmtree(output_images_dir)
             shutil.copytree(images_dir, output_images_dir)
             print("  ✅ 이미지 디렉토리 복사 완료")
+        
+        return True
+    
+    def create_default_slides(self):
+        """기본 슬라이드 HTML 파일들 생성"""
+        print("  🔧 기본 슬라이드 생성 중...")
+        
+        # 기본 슬라이드 정보
+        slides_info = [
+            ("title_slide.html", "타이틀 슬라이드", "수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로"),
+            ("course_overview.html", "강의 개요", "교육 목표, 대상, 단계별 학습 내용"),
+            ("basic_features.html", "기초 단계", "크롬 브라우저 기본 기능 마스터"),
+            ("extensions_intro.html", "중급 단계 - 확장프로그램", "교육자를 위한 필수 확장프로그램"),
+            ("korean_edu_tools.html", "중급 단계 - 한글교육 도구", "한글교육 특화 웹도구 활용"),
+            ("advanced_collab.html", "고급 단계 - 워크스페이스", "구글 워크스페이스 연동 마스터"),
+            ("ai_tools.html", "고급 단계 - AI 도구", "AI 기반 교육 도구 활용"),
+            ("practice_scenarios.html", "실습 시나리오", "단계별 실습 가이드"),
+            ("resources.html", "추가 자료", "참고 링크 및 학습 자료"),
+            ("qa_contact.html", "질문 및 연락처", "문의 및 지원 정보")
+        ]
+        
+        # 기본 HTML 템플릿
+        for filename, title, description in slides_info:
+            html_content = f'''<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {{ font-family: 'Noto Sans KR', sans-serif; }}
+        .slide-container {{
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: white;
+        }}
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="text-center">
+            <i class="fab fa-chrome text-8xl mb-8 text-blue-300"></i>
+            <h1 class="text-6xl font-bold mb-6">{title}</h1>
+            <p class="text-2xl opacity-90">{description}</p>
+            <div class="mt-12">
+                <p class="text-lg opacity-75">한글학교 선생님을 위한 크롬 웹브라우저 활용 교육</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>'''
+            
+            slide_file = self.output_dir / filename
+            with open(slide_file, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            print(f"  ✅ {filename} 기본 슬라이드 생성")
         
         return True
     

@@ -13,7 +13,6 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.dml.color import RGBColor
 from pptx.enum.dml import MSO_THEME_COLOR
-import requests
 from PIL import Image
 import io
 
