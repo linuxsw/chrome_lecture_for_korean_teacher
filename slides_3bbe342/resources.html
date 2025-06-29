@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #F5F5F5;
+        padding: 40px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-left: 20px;
+      }
+      .chrome-logo-small {
+        width: 50px;
+        height: 50px;
+      }
+      .content-container {
+        display: flex;
+        justify-content: space-between;
+      }
+      .left-column {
+        width: 45%;
+      }
+      .right-column {
+        width: 50%;
+      }
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #34A853;
+        margin-bottom: 10px;
+      }
+      .resource-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .resource-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+      .resource-icon {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 10px;
+      }
+      .resource-icon i {
+        font-size: 20px;
+      }
+      .link-list {
+        margin-left: 40px;
+      }
+      .link-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      .link-icon {
+        color: #EA4335;
+        margin-right: 10px;
+        width: 16px;
+        text-align: center;
+        margin-top: 3px;
+      }
+      .link-text {
+        font-size: 14px;
+      }
+      .link-url {
+        color: #4285F4;
+        font-weight: 500;
+        display: block;
+        font-size: 13px;
+      }
+      .community-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+      }
+      .community-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 10px;
+      }
+      .community-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+      .community-icon {
+        color: #4285F4;
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+        margin-top: 3px;
+      }
+      .qr-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 15px;
+      }
+      .qr-item {
+        text-align: center;
+      }
+      .qr-placeholder {
+        width: 100px;
+        height: 100px;
+        background-color: #F5F5F5;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 5px;
+      }
+      .qr-placeholder i {
+        font-size: 40px;
+        color: #4285F4;
+      }
+      .qr-label {
+        font-size: 12px;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <div class="header">
+        <img src="/home/ubuntu/chrome_edu_project/images/chrome_logo.png" alt="크롬 로고" class="chrome-logo-small">
+        <h1 class="title">추가 자료 및 참고 링크</h1>
+      </div>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <h2 class="section-title">학습 자료 및 튜토리얼</h2>
+          
+          <div class="resource-card">
+            <h3 class="resource-title">
+              <div class="resource-icon" style="color: #4285F4;">
+                <i class="fas fa-book"></i>
+              </div>
+              크롬 브라우저 공식 자료
+            </h3>
+            <div class="link-list">
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Google Chrome 도움말 센터</div>
+                  <div class="link-url">support.google.com/chrome</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Chrome 웹 스토어</div>
+                  <div class="link-url">chrome.google.com/webstore</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Chrome 개발자 블로그</div>
+                  <div class="link-url">developer.chrome.com/blog</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="resource-card">
+            <h3 class="resource-title">
+              <div class="resource-icon" style="color: #EA4335;">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              한글교육 자료
+            </h3>
+            <div class="link-list">
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">스터디코리안넷</div>
+                  <div class="link-url">study.korean.net</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">국립국어원 한국어교수학습샘터</div>
+                  <div class="link-url">kcenter.korean.go.kr</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">재미한국학교협의회 (NAKS)</div>
+                  <div class="link-url">www.naks.org</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="resource-card">
+            <h3 class="resource-title">
+              <div class="resource-icon" style="color: #FBBC05;">
+                <i class="fas fa-tools"></i>
+              </div>
+              디지털 교육 도구
+            </h3>
+            <div class="link-list">
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Brisk Teaching</div>
+                  <div class="link-url">www.briskteaching.com</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Canva 교육자용</div>
+                  <div class="link-url">www.canva.com/education</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">Google Workspace for Education</div>
+                  <div class="link-url">edu.google.com</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <h2 class="section-title">커뮤니티 및 지속적 학습</h2>
+          
+          <div class="community-card">
+            <h3 class="community-title">교사 커뮤니티</h3>
+            
+            <div class="community-item">
+              <div class="community-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div>
+                <strong>한글학교 교사 네트워크:</strong> 전 세계 한글학교 교사들의 경험과 자료를 공유하는 온라인 커뮤니티
+              </div>
+            </div>
+            
+            <div class="community-item">
+              <div class="community-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div>
+                <strong>교육 기술 포럼:</strong> 최신 교육 기술 트렌드와 디지털 도구 활용법을 논의하는 포럼
+              </div>
+            </div>
+            
+            <div class="community-item">
+              <div class="community-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+              </div>
+              <div>
+                <strong>크롬 교육자 그룹:</strong> 크롬 브라우저와 구글 도구를 교육에 활용하는 교사 모임
+              </div>
+            </div>
+            
+            <div class="qr-container">
+              <div class="qr-item">
+                <div class="qr-placeholder">
+                  <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="qr-label">교사 네트워크</div>
+              </div>
+              <div class="qr-item">
+                <div class="qr-placeholder">
+                  <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="qr-label">기술 포럼</div>
+              </div>
+              <div class="qr-item">
+                <div class="qr-placeholder">
+                  <i class="fas fa-qrcode"></i>
+                </div>
+                <div class="qr-label">교육자 그룹</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="resource-card">
+            <h3 class="resource-title">
+              <div class="resource-icon" style="color: #34A853;">
+                <i class="fas fa-laptop-code"></i>
+              </div>
+              온라인 강좌
+            </h3>
+            <div class="link-list">
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">티처빌 - 크롬 활용 강좌</div>
+                  <div class="link-url">www.teacherville.co.kr</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">구글 교육자 센터</div>
+                  <div class="link-url">teachercenter.withgoogle.com</div>
+                </div>
+              </div>
+              <div class="link-item">
+                <div class="link-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div>
+                  <div class="link-text">한국어 교원 온라인 연수</div>
+                  <div class="link-url">www.sejonghakdang.org</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-3 p-3 bg-blue-100 rounded-lg">
+            <p class="font-bold text-blue-800"><i class="fas fa-lightbulb mr-2"></i>교사 팁</p>
+            <p class="text-sm">디지털 도구와 교육 트렌드는 빠르게 변화합니다. 커뮤니티에 참여하고 정기적으로 새로운 도구와 방법을 탐색하는 것이 중요합니다. 작은 변화부터 시작해 점진적으로 디지털 역량을 키워나가세요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

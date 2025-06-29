@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #F5F5F5;
+        padding: 40px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-left: 20px;
+      }
+      .chrome-logo-small {
+        width: 50px;
+        height: 50px;
+      }
+      .content-container {
+        display: flex;
+        justify-content: space-between;
+      }
+      .left-column {
+        width: 45%;
+      }
+      .right-column {
+        width: 50%;
+      }
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #34A853;
+        margin-bottom: 10px;
+      }
+      .tool-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+      }
+      .tool-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #F5F5F5;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+      .tool-icon i {
+        font-size: 24px;
+      }
+      .tool-content {
+        flex-grow: 1;
+      }
+      .tool-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-bottom: 3px;
+      }
+      .tool-desc {
+        font-size: 14px;
+        margin-bottom: 3px;
+      }
+      .tag {
+        display: inline-block;
+        background-color: #FBBC05;
+        color: white;
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-right: 5px;
+      }
+      .workflow-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+      }
+      .workflow-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .workflow-steps {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+      }
+      .workflow-step {
+        text-align: center;
+        width: 100px;
+      }
+      .step-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #F5F5F5;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 10px;
+      }
+      .step-icon i {
+        font-size: 24px;
+      }
+      .step-text {
+        font-size: 14px;
+      }
+      .arrow {
+        color: #FBBC05;
+        font-size: 24px;
+      }
+      .benefits-list {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .benefits-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 10px;
+      }
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .benefit-icon {
+        color: #4285F4;
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <div class="header">
+        <img src="/home/ubuntu/chrome_edu_project/images/chrome_logo.png" alt="크롬 로고" class="chrome-logo-small">
+        <h1 class="title">고급 단계: 구글 워크스페이스 연동</h1>
+      </div>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <h2 class="section-title">통합 교육 플랫폼 구축</h2>
+          
+          <div class="tool-card">
+            <div class="tool-icon" style="color: #4285F4;">
+              <i class="fas fa-chalkboard"></i>
+            </div>
+            <div class="tool-content">
+              <h3 class="tool-title">구글 클래스룸</h3>
+              <p class="tool-desc">온라인 학급 관리 및 과제 배포/평가</p>
+              <div>
+                <span class="tag">학급관리</span>
+                <span class="tag">과제평가</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tool-card">
+            <div class="tool-icon" style="color: #EA4335;">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="tool-content">
+              <h3 class="tool-title">구글 문서/슬라이드</h3>
+              <p class="tool-desc">실시간 협업 문서 및 프레젠테이션</p>
+              <div>
+                <span class="tag">문서작성</span>
+                <span class="tag">실시간협업</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tool-card">
+            <div class="tool-icon" style="color: #FBBC05;">
+              <i class="fas fa-cloud"></i>
+            </div>
+            <div class="tool-content">
+              <h3 class="tool-title">구글 드라이브</h3>
+              <p class="tool-desc">클라우드 저장소 및 파일 공유</p>
+              <div>
+                <span class="tag">자료저장</span>
+                <span class="tag">공유</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="tool-card">
+            <div class="tool-icon" style="color: #34A853;">
+              <i class="fas fa-video"></i>
+            </div>
+            <div class="tool-content">
+              <h3 class="tool-title">구글 미트</h3>
+              <p class="tool-desc">화상 수업 및 회의</p>
+              <div>
+                <span class="tag">화상수업</span>
+                <span class="tag">화면공유</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div style="margin-bottom: 15px;">
+            <img src="/home/ubuntu/chrome_edu_project/images/cloud_collaboration.png" alt="클라우드 협업" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px;">
+          </div>
+          
+          <div class="workflow-container">
+            <h3 class="workflow-title">한글학교 수업 워크플로우</h3>
+            <div class="workflow-steps">
+              <div class="workflow-step">
+                <div class="step-icon" style="color: #4285F4;">
+                  <i class="fas fa-file-upload"></i>
+                </div>
+                <div class="step-text">자료 업로드</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="workflow-step">
+                <div class="step-icon" style="color: #EA4335;">
+                  <i class="fas fa-share-alt"></i>
+                </div>
+                <div class="step-text">학생 공유</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="workflow-step">
+                <div class="step-icon" style="color: #FBBC05;">
+                  <i class="fas fa-pencil-alt"></i>
+                </div>
+                <div class="step-text">실시간 협업</div>
+              </div>
+              <div class="arrow">→</div>
+              <div class="workflow-step">
+                <div class="step-icon" style="color: #34A853;">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="step-text">피드백/평가</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="benefits-list">
+            <h3 class="benefits-title">구글 워크스페이스 활용 이점</h3>
+            
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <i class="fas fa-sync-alt"></i>
+              </div>
+              <div>
+                <strong>실시간 동기화:</strong> 모든 기기에서 동일한 환경
+              </div>
+            </div>
+            
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div>
+                <strong>협업 강화:</strong> 교사-학생, 교사-교사 간 실시간 협업
+              </div>
+            </div>
+            
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <i class="fas fa-tasks"></i>
+              </div>
+              <div>
+                <strong>과제 관리:</strong> 배포, 제출, 평가 자동화
+              </div>
+            </div>
+            
+            <div class="benefit-item">
+              <div class="benefit-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div>
+                <strong>학습 분석:</strong> 학생 참여도 및 성취도 추적
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-3 p-3 bg-blue-100 rounded-lg">
+            <p class="font-bold text-blue-800"><i class="fas fa-lightbulb mr-2"></i>교사 팁</p>
+            <p class="text-sm">크롬 브라우저에서 구글 계정으로 로그인하면 모든 구글 워크스페이스 도구를 원활하게 연동하여 사용할 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

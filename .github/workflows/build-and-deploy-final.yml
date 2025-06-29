@@ -1,0 +1,171 @@
+name: Build and Deploy Final Chrome Education Materials
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wkhtmltopdf pandoc bc
+        # 한글 폰트 설치 (PDF 한글 지원)
+        sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+        sudo fc-cache -fv
+        echo "✅ System dependencies installed"
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install python-pptx pillow weasyprint markdown
+        echo "✅ Python dependencies installed"
+        
+    - name: Restore Commit 3bbe342 slides and images
+      run: |
+        echo "🔄 Restoring Commit 3bbe342 slides and images..."
+        
+        # 슬라이드 디렉토리 생성
+        mkdir -p slides_3bbe342/images
+        
+        # HTML 슬라이드 파일들 복원
+        for file in title_slide.html course_overview.html basic_features.html extensions_intro.html korean_edu_tools.html advanced_collab.html ai_tools.html practice_scenarios.html resources.html qa_contact.html; do
+          git show 3bbe342:slides/$file > slides_3bbe342/$file
+          echo "  ✅ Restored: $file"
+        done
+        
+        # 이미지 파일들 복원
+        for img in chrome_extensions.png chrome_logo.png cloud_collaboration.png digital_tools.jpg korean_school.jpg online_korean_class.jpg; do
+          git show 3bbe342:slides/images/$img > slides_3bbe342/images/$img
+          echo "  ✅ Restored image: $img"
+        done
+        
+        echo "✅ Commit 3bbe342 restoration completed"
+        
+    - name: Create directories
+      run: |
+        mkdir -p output docs
+        echo "✅ Directories created"
+      
+    - name: Generate all materials with different methods
+      run: |
+        echo "🚀 Starting integrated material generation..."
+        
+        # 통합 자료 생성 스크립트 실행 권한 부여
+        chmod +x scripts/generate_all_materials.sh
+        
+        # 통합 자료 생성 실행
+        bash scripts/generate_all_materials.sh
+        
+        echo "✅ Integrated material generation completed"
+        
+    - name: Verify generated files with detailed info
+      run: |
+        echo "📋 Final verification with detailed information:"
+        echo "=============================================="
+        
+        # 필수 파일들 확인
+        REQUIRED_FILES=(
+          "output/index.html"
+          "output/chrome_education_slides.pptx"
+          "output/chrome_edu_workbook.pdf"
+        )
+        
+        ALL_GOOD=true
+        
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ -f "$file" ]; then
+            size=$(stat -c%s "$file")
+            echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
+            
+            # 파일별 상세 정보
+            case "$file" in
+              *index.html)
+                echo "   📄 HTML Pages (Commit 3bbe342 + timestamp)"
+                ;;
+              *chrome_education_slides.pptx)
+                mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
+                echo "   📊 PowerPoint (Aspose style + Commit 3bbe342 images) - ${mb} MB"
+                ;;
+              *chrome_edu_workbook.pdf)
+                kb=$(echo "scale=1; $size / 1024" | bc -l)
+                echo "   📚 PDF Workbook (Commit 4a9b4e9 method) - ${kb} KB"
+                ;;
+            esac
+          else
+            echo "❌ $(basename $file): Missing (REQUIRED)"
+            ALL_GOOD=false
+          fi
+        done
+        
+        # HTML 슬라이드 개수 확인
+        html_count=$(find output -name "*.html" -not -name "index.html" | wc -l)
+        echo "📄 Individual HTML slides: ${html_count} files"
+        
+        # 이미지 개수 확인
+        if [ -d "output/images" ]; then
+          image_count=$(find output/images -type f | wc -l)
+          echo "🖼️ Images: ${image_count} files"
+        fi
+        
+        echo "=============================================="
+        
+        if [ "$ALL_GOOD" = false ]; then
+          echo "❌ Required files are missing. Build failed."
+          exit 1
+        fi
+        
+        echo "🎉 All files generated successfully!"
+        echo "📊 Build summary:"
+        echo "  • HTML: Commit 3bbe342 original slides + timestamp"
+        echo "  • PPTX: Aspose-style with Commit 3bbe342 images"
+        echo "  • PDF: Commit 4a9b4e9 method with Korean font support"
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      with:
+        enablement: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './output'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+

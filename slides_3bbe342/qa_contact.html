@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+      }
+      .title {
+        font-size: 48px;
+        font-weight: 700;
+        color: #4285F4;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .contact-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 1000px;
+        margin-bottom: 50px;
+      }
+      .contact-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 25px;
+        width: 45%;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .contact-icon {
+        width: 80px;
+        height: 80px;
+        background-color: #F5F5F5;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .contact-icon i {
+        font-size: 40px;
+      }
+      .contact-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        width: 100%;
+      }
+      .item-icon {
+        width: 30px;
+        color: #34A853;
+        margin-right: 15px;
+        text-align: center;
+      }
+      .item-text {
+        font-size: 16px;
+      }
+      .social-links {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .social-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #F5F5F5;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 10px;
+        color: #4285F4;
+        font-size: 24px;
+        transition: all 0.3s ease;
+      }
+      .social-icon:hover {
+        transform: scale(1.1);
+      }
+      .thank-you {
+        font-size: 36px;
+        font-weight: 700;
+        color: #FBBC05;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .chrome-colors {
+        display: flex;
+        margin-top: 30px;
+      }
+      .color-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin: 0 10px;
+      }
+      .blue { background-color: #4285F4; }
+      .red { background-color: #EA4335; }
+      .yellow { background-color: #FBBC05; }
+      .green { background-color: #34A853; }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">질문 및 연락처</h1>
+      
+      <div class="contact-container">
+        <div class="contact-card">
+          <div class="contact-icon" style="color: #4285F4;">
+            <i class="fas fa-envelope"></i>
+          </div>
+          <h2 class="contact-title">문의 및 지원</h2>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="item-text">
+              <strong>이메일:</strong> support@koreanedu.org
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-phone-alt"></i>
+            </div>
+            <div class="item-text">
+              <strong>전화:</strong> 02-123-4567
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-comment-dots"></i>
+            </div>
+            <div class="item-text">
+              <strong>채팅 지원:</strong> 평일 9:00-18:00
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="item-text">
+              <strong>FAQ:</strong> www.koreanedu.org/faq
+            </div>
+          </div>
+        </div>
+        
+        <div class="contact-card">
+          <div class="contact-icon" style="color: #EA4335;">
+            <i class="fas fa-users"></i>
+          </div>
+          <h2 class="contact-title">커뮤니티 참여</h2>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-globe"></i>
+            </div>
+            <div class="item-text">
+              <strong>웹사이트:</strong> www.koreanedu.org
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="item-text">
+              <strong>월간 웨비나:</strong> 매월 마지막 주 토요일
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="item-icon">
+              <i class="fas fa-newspaper"></i>
+            </div>
+            <div class="item-text">
+              <strong>뉴스레터:</strong> 월 2회 발행
+            </div>
+          </div>
+          
+          <div class="social-links">
+            <div class="social-icon">
+              <i class="fab fa-facebook-f"></i>
+            </div>
+            <div class="social-icon">
+              <i class="fab fa-youtube"></i>
+            </div>
+            <div class="social-icon">
+              <i class="fab fa-instagram"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <h2 class="thank-you">감사합니다!</h2>
+      <p class="text-xl">더 나은 한글교육을 위한 여러분의 디지털 여정을 응원합니다.</p>
+      
+      <div class="chrome-colors">
+        <div class="color-dot blue"></div>
+        <div class="color-dot red"></div>
+        <div class="color-dot yellow"></div>
+        <div class="color-dot green"></div>
+      </div>
+    </div>
+  </body>
+</html>
+

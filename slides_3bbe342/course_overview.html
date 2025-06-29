@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #F5F5F5;
+        padding: 40px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-left: 20px;
+      }
+      .content-container {
+        display: flex;
+        justify-content: space-between;
+      }
+      .left-column {
+        width: 45%;
+      }
+      .right-column {
+        width: 50%;
+      }
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 15px;
+      }
+      .info-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .icon {
+        width: 30px;
+        color: #34A853;
+        margin-right: 15px;
+        text-align: center;
+      }
+      .level-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .level-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+      .level-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: inline-block;
+      }
+      .basic { background-color: #34A853; }
+      .intermediate { background-color: #FBBC05; }
+      .advanced { background-color: #EA4335; }
+      .chrome-logo-small {
+        width: 50px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <div class="header">
+        <img src="/home/ubuntu/chrome_edu_project/images/chrome_logo.png" alt="크롬 로고" class="chrome-logo-small">
+        <h1 class="title">강의 개요</h1>
+      </div>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <h2 class="section-title">교육 과정 정보</h2>
+          
+          <div class="info-item">
+            <div class="icon"><i class="fas fa-bullseye fa-lg"></i></div>
+            <div>
+              <strong>목표:</strong> 크롬 웹브라우저를 활용하여 한글교육의 효율성을 높이고 디지털 교육 도구를 마스터하기
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <div class="icon"><i class="fas fa-users fa-lg"></i></div>
+            <div>
+              <strong>대상:</strong> 한글학교 교사 및 한국어 교육자
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <div class="icon"><i class="fas fa-clock fa-lg"></i></div>
+            <div>
+              <strong>구성:</strong> 총 10차시 (기초 3차시, 중급 4차시, 고급 3차시)
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <div class="icon"><i class="fas fa-laptop fa-lg"></i></div>
+            <div>
+              <strong>방식:</strong> 이론 학습 + 실습 + 실제 적용 시나리오
+            </div>
+          </div>
+          
+          <img src="/home/ubuntu/chrome_edu_project/images/korean_school.jpg" alt="한글학교 수업" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 10px; margin-top: 20px;">
+        </div>
+        
+        <div class="right-column">
+          <h2 class="section-title">단계별 학습 내용</h2>
+          
+          <div class="level-container">
+            <div class="level-title">
+              <span class="level-dot basic"></span>
+              기초 단계 (1-3차시)
+            </div>
+            <ul class="ml-8 list-disc">
+              <li>크롬 브라우저 기본 설정과 최적화</li>
+              <li>즐겨찾기와 북마크 관리 마스터</li>
+              <li>필수 단축키와 효율적 탭 관리</li>
+            </ul>
+          </div>
+          
+          <div class="level-container">
+            <div class="level-title">
+              <span class="level-dot intermediate"></span>
+              중급 단계 (4-7차시)
+            </div>
+            <ul class="ml-8 list-disc">
+              <li>교육자를 위한 필수 확장프로그램</li>
+              <li>AI 교육 도구 활용 - Brisk Teaching</li>
+              <li>온라인 수업 도구 활용</li>
+              <li>한글교육 특화 웹사이트 활용</li>
+            </ul>
+          </div>
+          
+          <div class="level-container">
+            <div class="level-title">
+              <span class="level-dot advanced"></span>
+              고급 단계 (8-10차시)
+            </div>
+            <ul class="ml-8 list-disc">
+              <li>구글 워크스페이스 연동 마스터</li>
+              <li>멀티미디어 콘텐츠 제작 및 관리</li>
+              <li>디지털 교육 생태계 구축 및 보안</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
