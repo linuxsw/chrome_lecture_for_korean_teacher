@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Noto Sans KR', sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #F5F5F5;
+        padding: 40px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-left: 20px;
+      }
+      .chrome-logo-small {
+        width: 50px;
+        height: 50px;
+      }
+      .content-container {
+        display: flex;
+        justify-content: space-between;
+      }
+      .left-column {
+        width: 45%;
+      }
+      .right-column {
+        width: 50%;
+      }
+      .feature-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+      }
+      .feature-icon {
+        width: 50px;
+        height: 50px;
+        background-color: #F5F5F5;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+      .feature-icon i {
+        font-size: 24px;
+      }
+      .feature-content {
+        flex-grow: 1;
+      }
+      .feature-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4285F4;
+        margin-bottom: 10px;
+      }
+      .shortcut-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .shortcut-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #EA4335;
+        margin-bottom: 15px;
+      }
+      .shortcut-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .shortcut-item {
+        display: flex;
+        align-items: center;
+      }
+      .key {
+        background-color: #FBBC05;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: 700;
+        margin-right: 10px;
+        font-size: 14px;
+      }
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #34A853;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <div class="header">
+        <img src="/home/ubuntu/chrome_edu_project/images/chrome_logo.png" alt="크롬 로고" class="chrome-logo-small">
+        <h1 class="title">기초 단계: 크롬 브라우저 기본 기능</h1>
+      </div>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <h2 class="section-title">핵심 기능 마스터하기</h2>
+          
+          <div class="feature-card">
+            <div class="feature-icon" style="color: #4285F4;">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="feature-content">
+              <h3 class="feature-title">프로필 관리</h3>
+              <ul class="ml-5 list-disc">
+                <li>개인용/업무용 프로필 분리</li>
+                <li>학생별/학급별 프로필 설정</li>
+                <li>설정 및 북마크 동기화</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon" style="color: #EA4335;">
+              <i class="fas fa-bookmark"></i>
+            </div>
+            <div class="feature-content">
+              <h3 class="feature-title">즐겨찾기 관리</h3>
+              <ul class="ml-5 list-disc">
+                <li>북마크 바 활성화 및 정리</li>
+                <li>폴더별 구조화 (학년별/주제별)</li>
+                <li>북마크 가져오기/내보내기</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="feature-card">
+            <div class="feature-icon" style="color: #FBBC05;">
+              <i class="fas fa-cog"></i>
+            </div>
+            <div class="feature-content">
+              <h3 class="feature-title">기본 설정 최적화</h3>
+              <ul class="ml-5 list-disc">
+                <li>시작 페이지 설정</li>
+                <li>검색 엔진 설정</li>
+                <li>자동 번역 기능 활성화</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div style="margin-bottom: 20px;">
+            <img src="/home/ubuntu/chrome_edu_project/images/chrome_features.webp" alt="크롬 브라우저 기능" style="width: 100%; border-radius: 10px;">
+          </div>
+          
+          <div class="shortcut-container">
+            <h3 class="shortcut-title">교육자를 위한 필수 단축키</h3>
+            <div class="shortcut-grid">
+              <div class="shortcut-item">
+                <span class="key">Ctrl+T</span>
+                <span>새 탭 열기</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+W</span>
+                <span>현재 탭 닫기</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+Shift+T</span>
+                <span>닫은 탭 복구</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+Tab</span>
+                <span>다음 탭으로 이동</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+D</span>
+                <span>북마크 추가</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+F</span>
+                <span>페이지 내 검색</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">Ctrl+P</span>
+                <span>인쇄</span>
+              </div>
+              <div class="shortcut-item">
+                <span class="key">F11</span>
+                <span>전체 화면</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-4 bg-blue-100 rounded-lg">
+            <p class="font-bold text-blue-800"><i class="fas fa-lightbulb mr-2"></i>교사 팁</p>
+            <p>수업 전 관련 사이트를 모두 탭으로 열어두고 탭 그룹으로 저장하면 수업 준비 시간을 단축할 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
