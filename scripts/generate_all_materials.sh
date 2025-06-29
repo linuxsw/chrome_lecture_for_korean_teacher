@@ -20,10 +20,10 @@ echo ""
 # 출력 디렉토리 생성
 mkdir -p "$OUTPUT_DIR"
 
-# 1. PDF 워크북 생성 (Commit 4a9b4e9 방법)
-echo "📚 PDF 워크북 생성 중 (Commit 4a9b4e9 방법)..."
+# 1. PDF 워크북 생성 (강화된 한글 폰트 지원)
+echo "📚 PDF 워크북 생성 중 (강화된 한글 폰트 지원)..."
 cd "$PROJECT_DIR"
-python3 scripts/generate_pdf_original.py
+python3 scripts/generate_pdf_fixed.py
 echo ""
 
 # 2. HTML Pages 생성 (Commit 3bbe342 + 타임스탬프)

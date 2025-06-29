@@ -42,7 +42,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install python-pptx pillow weasyprint markdown
+        pip install python-pptx pillow weasyprint markdown reportlab
         echo "✅ Python dependencies installed"
         
     - name: Restore Commit 3bbe342 slides and images
