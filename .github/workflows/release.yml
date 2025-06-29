@@ -25,11 +25,14 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y wkhtmltopdf pandoc zip
+        # 한글 폰트 설치
+        sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+        sudo fc-cache -fv
         
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install markdown weasyprint reportlab
+        pip install markdown weasyprint reportlab python-pptx
         
     - name: Generate materials
       run: |
@@ -44,13 +47,114 @@ jobs:
         
         # PDF 생성 (워크북이 있는 경우)
         if [ -f "docs/chrome_edu_workbook.md" ]; then
-          pandoc docs/chrome_edu_workbook.md -o output/chrome_edu_workbook.pdf \
-            --pdf-engine=wkhtmltopdf \
-            -V margin-top=20mm \
-            -V margin-bottom=20mm \
-            -V margin-left=15mm \
-            -V margin-right=15mm
+          echo "📚 Converting workbook to PDF..."
+          
+          # WeasyPrint 사용 (한글 지원 우수)
+          if python -c "import weasyprint" 2>/dev/null; then
+            echo "Using WeasyPrint for PDF generation..."
+            python -c "
+import weasyprint
+import markdown
+
+# CSS 스타일 정의 (한글 폰트 포함)
+css_style = '''
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+body {
+    font-family: 'Noto Sans KR', 'Noto Sans CJK KR', sans-serif;
+    line-height: 1.6;
+    margin: 2cm;
+    font-size: 12pt;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+h1 { font-size: 24pt; }
+h2 { font-size: 20pt; }
+h3 { font-size: 16pt; }
+'''
+
+# Markdown을 HTML로 변환
+with open('docs/chrome_edu_workbook.md', 'r', encoding='utf-8') as f:
+    md_content = f.read()
+
+html_content = f'''
+<!DOCTYPE html>
+<html lang=\"ko\">
+<head>
+    <meta charset=\"UTF-8\">
+    <style>{css_style}</style>
+</head>
+<body>
+{markdown.markdown(md_content)}
+</body>
+</html>
+'''
+
+# PDF 생성
+weasyprint.HTML(string=html_content).write_pdf('output/chrome_edu_workbook.pdf')
+print('✅ PDF generated successfully with WeasyPrint')
+"
+          else
+            echo "WeasyPrint not available, using Pandoc..."
+            pandoc docs/chrome_edu_workbook.md -o output/chrome_edu_workbook.pdf \
+              --pdf-engine=wkhtmltopdf \
+              -V margin-top=20mm \
+              -V margin-bottom=20mm \
+              -V margin-left=15mm \
+              -V margin-right=15mm \
+              -V mainfont="Noto Sans CJK KR"
+          fi
         fi
+        
+        # PowerPoint 생성
+        echo "📊 Creating PowerPoint presentation..."
+        python -c "
+from pptx import Presentation
+from pptx.util import Pt
+from pptx.dml.color import RGBColor
+
+# 슬라이드 구성 정보
+slides_config = [
+    {'title': '수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로', 'subtitle': '디지털 도구 완전정복\n한글학교 선생님을 위한 크롬 웹브라우저 활용 교육'},
+    {'title': '강의 개요', 'content': ['교육 목표 및 대상', '기초-중급-고급 단계별 구성', '실습 중심의 학습 방법', '지속적인 학습을 위한 커뮤니티']},
+    {'title': '기초 단계: 크롬 브라우저 기본 기능', 'content': ['프로필 관리', '북마크 활용', '단축키 활용', '기본 설정 최적화']},
+    {'title': '중급 단계: 교육자를 위한 확장프로그램', 'content': ['Fireshot - 웹페이지 캡처', 'Google Keep - 메모 및 스크랩', 'Video Speed Controller - 동영상 속도 조절', 'Mote - 음성 피드백']},
+    {'title': '중급 단계: 한글교육 특화 웹도구', 'content': ['스터디코리안넷', '한국어교수학습샘터', 'NAKS 온라인 자료실', '한글또박또박']},
+    {'title': '고급 단계: 구글 워크스페이스 연동', 'content': ['구글 클래스룸', '구글 문서/슬라이드', '구글 드라이브', '구글 미트']},
+    {'title': '고급 단계: AI 도구 활용', 'content': ['Brisk Teaching - AI 교사 어시스턴트', 'ChatGPT - 교육 자료 생성', 'Canva AI - 시각적 자료 제작', '음성 인식/합성 도구']},
+    {'title': '실습 시나리오', 'content': ['새 학기 준비 (기초)', '효율적인 수업 자료 준비 (중급)', '온라인 수업 진행 (중급)', '학급 관리 시스템 구축 (고급)']},
+    {'title': '추가 자료 및 참고 링크', 'content': ['크롬 브라우저 공식 자료', '한글교육 자료', '디지털 교육 도구', '교사 커뮤니티']},
+    {'title': '질문 및 연락처', 'content': ['이메일: support@koreanedu.org', '전화: 02-123-4567', '웹사이트: www.koreanedu.org']}
+]
+
+# 새 프레젠테이션 생성
+prs = Presentation()
+chrome_blue = RGBColor(66, 133, 244)
+
+for i, slide_data in enumerate(slides_config):
+    slide_layout = prs.slide_layouts[0] if i == 0 else prs.slide_layouts[1]
+    slide = prs.slides.add_slide(slide_layout)
+    
+    title = slide.shapes.title
+    title.text = slide_data['title']
+    title.text_frame.paragraphs[0].font.size = Pt(32)
+    title.text_frame.paragraphs[0].font.color.rgb = chrome_blue
+    
+    if i == 0 and slide.placeholders[1]:
+        subtitle = slide.placeholders[1]
+        subtitle.text = slide_data['subtitle']
+        subtitle.text_frame.paragraphs[0].font.size = Pt(20)
+    elif 'content' in slide_data and slide.placeholders[1]:
+        content = slide.placeholders[1]
+        content.text = '\n'.join([f'• {item}' for item in slide_data['content']])
+        for paragraph in content.text_frame.paragraphs:
+            paragraph.font.size = Pt(18)
+
+prs.save('output/chrome_education_slides.pptx')
+print('✅ PowerPoint 파일 생성 완료')
+"
         
         echo "✅ Material generation completed"
         
@@ -75,6 +179,7 @@ jobs:
         # 개별 파일들도 준비
         cp output/chrome_edu_workbook.pdf chrome-education-workbook-${{ github.ref_name }}.pdf 2>/dev/null || true
         cp output/index.html chrome-education-slides-${{ github.ref_name }}.html 2>/dev/null || true
+        cp output/chrome_education_slides.pptx chrome-education-slides-${{ github.ref_name }}.pptx 2>/dev/null || true
         
         echo "✅ Release package created"
         
@@ -121,6 +226,7 @@ jobs:
           chrome-education-materials-${{ github.ref_name }}.zip
           chrome-education-workbook-${{ github.ref_name }}.pdf
           chrome-education-slides-${{ github.ref_name }}.html
+          chrome-education-slides-${{ github.ref_name }}.pptx
         draft: false
         prerelease: false
       env:
