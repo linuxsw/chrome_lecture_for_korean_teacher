@@ -6,7 +6,8 @@
 set -e  # 오류 발생 시 스크립트 중단
 
 echo "🚀 통합 교육 자료 생성 시스템 시작"
-echo "📅 $(date '+%Y년 %m월 %d일 %H시 %M분')"
+TIMESTAMP="$(date '+%Y%m%d_%H%M')"
+echo "📅 $TIMESTAMP"
 echo ""
 
 # 프로젝트 디렉토리 설정
@@ -19,11 +20,12 @@ echo ""
 
 # 출력 디렉토리 생성
 mkdir -p "$OUTPUT_DIR"
+export TIMESTAMP
 
 # 1. PDF 워크북 생성 (강화된 한글 폰트 지원)
-echo "📚 PDF 워크북 생성 중 (강화된 한글 폰트 지원)..."
+echo "📚 PDF 워크북 생성 중 (Commit 4a9b4e9 방법)..."
 cd "$PROJECT_DIR"
-python3 scripts/generate_pdf_fixed.py
+python3 scripts/generate_pdf.py
 echo ""
 
 # 2. HTML Pages 생성 (Commit 3bbe342 + 타임스탬프)
@@ -41,10 +43,12 @@ echo "🔍 생성 결과 검증 중..."
 echo "----------------------------------------"
 
 # 필수 파일들 확인
+PPTX_FILE="output/chrome_education_slides_${TIMESTAMP}.pptx"
+PDF_FILE="output/chrome_edu_workbook_${TIMESTAMP}.pdf"
 REQUIRED_FILES=(
     "output/index.html"
-    "output/chrome_education_slides.pptx"
-    "output/chrome_edu_workbook.pdf"
+    "$PPTX_FILE"
+    "$PDF_FILE"
 )
 
 OPTIONAL_FILES=(
@@ -107,8 +111,8 @@ if [ -f "$OUTPUT_DIR/index.html" ]; then
     echo "   - 반응형 디자인"
 fi
 
-if [ -f "$OUTPUT_DIR/chrome_education_slides.pptx" ]; then
-    size=$(stat -c%s "$OUTPUT_DIR/chrome_education_slides.pptx" 2>/dev/null || stat -f%z "$OUTPUT_DIR/chrome_education_slides.pptx" 2>/dev/null || echo "0")
+if [ -f "$PPTX_FILE" ]; then
+    size=$(stat -c%s "$PPTX_FILE" 2>/dev/null || stat -f%z "$PPTX_FILE" 2>/dev/null || echo "0")
     mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l 2>/dev/null || echo "0")
     echo "📊 PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
     echo "   - Aspose 스타일 고급 기능"
@@ -116,8 +120,8 @@ if [ -f "$OUTPUT_DIR/chrome_education_slides.pptx" ]; then
     echo "   - 한글 폰트 지원"
 fi
 
-if [ -f "$OUTPUT_DIR/chrome_edu_workbook.pdf" ]; then
-    size=$(stat -c%s "$OUTPUT_DIR/chrome_edu_workbook.pdf" 2>/dev/null || stat -f%z "$OUTPUT_DIR/chrome_edu_workbook.pdf" 2>/dev/null || echo "0")
+if [ -f "$PDF_FILE" ]; then
+    size=$(stat -c%s "$PDF_FILE" 2>/dev/null || stat -f%z "$PDF_FILE" 2>/dev/null || echo "0")
     kb=$(echo "scale=1; $size / 1024" | bc -l 2>/dev/null || echo "0")
     echo "📚 PDF 워크북: $(printf "%'d" $size) bytes (${kb} KB)"
     echo "   - Commit 4a9b4e9 방법 사용"
@@ -133,8 +137,8 @@ if [ "$ALL_GOOD" = true ]; then
     echo ""
     echo "📂 결과물 위치: $OUTPUT_DIR"
     echo "🌐 온라인 프레젠테이션: index.html"
-    echo "📊 오프라인 프레젠테이션: chrome_education_slides.pptx"
-    echo "📚 실습 워크북: chrome_edu_workbook.pdf"
+    echo "📊 오프라인 프레젠테이션: $(basename "$PPTX_FILE")"
+    echo "📚 실습 워크북: $(basename "$PDF_FILE")"
     echo ""
     echo "💡 각 형식별 특징:"
     echo "  • HTML: Commit 3bbe342 원본 + 타임스탬프"

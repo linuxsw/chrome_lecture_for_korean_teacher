@@ -18,6 +18,11 @@ class HTMLPagesGenerator:
         self.project_dir = Path(project_dir)
         self.slides_source_dir = self.project_dir / "slides_3bbe342"
         self.output_dir = self.project_dir / "output"
+
+        # 타임스탬프 (파일명 및 표시용)
+        self.timestamp = os.getenv("TIMESTAMP") or datetime.now().strftime("%Y%m%d_%H%M")
+        self.pptx_filename = f"chrome_education_slides_{self.timestamp}.pptx"
+        self.pdf_filename = f"chrome_edu_workbook_{self.timestamp}.pdf"
         
         # 디렉토리 생성
         self.output_dir.mkdir(exist_ok=True)
@@ -260,7 +265,7 @@ class HTMLPagesGenerator:
                 <i class="fas fa-download mr-3 text-green-500"></i>다운로드 자료
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <a href="chrome_education_slides.pptx" target="_blank" 
+                <a href="{self.pptx_filename}" target="_blank"
                    class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all transform hover:scale-105 group">
                     <div class="text-center">
                         <i class="fas fa-file-powerpoint text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
@@ -272,7 +277,7 @@ class HTMLPagesGenerator:
                     </div>
                 </a>
                 
-                <a href="chrome_edu_workbook.pdf" target="_blank" 
+                <a href="{self.pdf_filename}" target="_blank"
                    class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 group">
                     <div class="text-center">
                         <i class="fas fa-file-pdf text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
@@ -429,8 +434,8 @@ class HTMLPagesGenerator:
             ],
             "generated_files": [
                 "index.html",
-                "chrome_education_slides.pptx",
-                "chrome_edu_workbook.pdf",
+                f"{self.pptx_filename}",
+                f"{self.pdf_filename}",
                 "title_slide.html",
                 "course_overview.html",
                 "basic_features.html",

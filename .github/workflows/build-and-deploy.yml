@@ -44,6 +44,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install python-pptx pillow weasyprint markdown reportlab
         echo "✅ Python dependencies installed"
+
+    - name: Set build timestamp
+      run: echo "TIMESTAMP=$(date '+%Y%m%d_%H%M')" >> $GITHUB_ENV
         
     - name: Create directories
       run: |
@@ -117,6 +120,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: './output'
+        name: chrome-edu-materials-${{ env.TIMESTAMP }}
 
   deploy:
     environment:

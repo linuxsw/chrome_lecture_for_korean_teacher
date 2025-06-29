@@ -70,6 +70,9 @@ jobs:
       run: |
         mkdir -p output docs
         echo "✅ Directories created"
+
+    - name: Set build timestamp
+      run: echo "TIMESTAMP=$(date '+%Y%m%d_%H%M')" >> $GITHUB_ENV
       
     - name: Generate all materials with different methods
       run: |
@@ -91,8 +94,8 @@ jobs:
         # 필수 파일들 확인
         REQUIRED_FILES=(
           "output/index.html"
-          "output/chrome_education_slides.pptx"
-          "output/chrome_edu_workbook.pdf"
+          "output/chrome_education_slides_${TIMESTAMP}.pptx"
+          "output/chrome_edu_workbook_${TIMESTAMP}.pdf"
         )
         
         ALL_GOOD=true
@@ -107,11 +110,11 @@ jobs:
               *index.html)
                 echo "   📄 HTML Pages (Commit 3bbe342 + timestamp)"
                 ;;
-              *chrome_education_slides.pptx)
+              *chrome_education_slides_*.pptx)
                 mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
                 echo "   📊 PowerPoint (Aspose style + Commit 3bbe342 images) - ${mb} MB"
                 ;;
-              *chrome_edu_workbook.pdf)
+              *chrome_edu_workbook_*.pdf)
                 kb=$(echo "scale=1; $size / 1024" | bc -l)
                 echo "   📚 PDF Workbook (Commit 4a9b4e9 method) - ${kb} KB"
                 ;;
@@ -155,6 +158,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: './output'
+        name: chrome-edu-materials-${{ env.TIMESTAMP }}
 
   deploy:
     environment:

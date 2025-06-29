@@ -7,6 +7,9 @@ WeasyPrint를 우선 사용하고, 실패 시 Pandoc으로 폴백
 import os
 import subprocess
 import sys
+from datetime import datetime
+
+OUTPUT_FILE = "output/chrome_edu_workbook.pdf"
 
 def generate_pdf_with_weasyprint():
     """WeasyPrint를 사용한 PDF 생성"""
@@ -53,7 +56,7 @@ def generate_pdf_with_weasyprint():
         '''
         
         # PDF 생성
-        weasyprint.HTML(string=html_content).write_pdf('output/chrome_edu_workbook.pdf')
+        weasyprint.HTML(string=html_content).write_pdf(OUTPUT_FILE)
         print('✅ PDF generated successfully with WeasyPrint')
         return True
         
@@ -71,7 +74,7 @@ def generate_pdf_with_pandoc():
         
         cmd = [
             'pandoc', 'docs/chrome_edu_workbook.md',
-            '-o', 'output/chrome_edu_workbook.pdf',
+            '-o', OUTPUT_FILE,
             '--pdf-engine=wkhtmltopdf',
             '-V', 'margin-top=20mm',
             '-V', 'margin-bottom=20mm',
@@ -99,8 +102,11 @@ def main():
         print("Workbook markdown file not found")
         return
     
-    # 출력 디렉토리 확인
+    # 출력 디렉토리 확인 및 파일명 설정
     os.makedirs('output', exist_ok=True)
+    timestamp = os.getenv('TIMESTAMP') or datetime.now().strftime('%Y%m%d_%H%M')
+    global OUTPUT_FILE
+    OUTPUT_FILE = f'output/chrome_edu_workbook_{timestamp}.pdf'
     
     # WeasyPrint 우선 시도
     if generate_pdf_with_weasyprint():

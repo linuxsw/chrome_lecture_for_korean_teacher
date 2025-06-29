@@ -34,6 +34,9 @@ class AsposeStylePPTXGenerator:
         self.project_dir = Path(project_dir)
         self.slides_source_dir = self.project_dir / "slides_3bbe342"
         self.output_dir = self.project_dir / "output"
+
+        self.timestamp = os.getenv("TIMESTAMP") or datetime.now().strftime("%Y%m%d_%H%M")
+        self.output_file = self.output_dir / f"chrome_education_slides_{self.timestamp}.pptx"
         
         # 출력 디렉토리 생성
         self.output_dir.mkdir(exist_ok=True)
@@ -451,8 +454,8 @@ class AsposeStylePPTXGenerator:
     
     def save_presentation(self):
         """프레젠테이션 저장"""
-        output_file = self.output_dir / "chrome_education_slides.pptx"
-        
+        output_file = self.output_file
+
         try:
             self.prs.save(str(output_file))
             file_size = output_file.stat().st_size
@@ -488,7 +491,7 @@ class AsposeStylePPTXGenerator:
         
         if success:
             print("✅ 성공적으로 완료되었습니다!")
-            print(f"📄 생성된 파일: {self.output_dir}/chrome_education_slides.pptx")
+            print(f"📄 생성된 파일: {self.output_file}")
         else:
             print("❌ 프레젠테이션 생성에 실패했습니다.")
         
