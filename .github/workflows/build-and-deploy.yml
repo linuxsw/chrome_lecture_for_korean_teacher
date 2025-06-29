@@ -60,10 +60,10 @@ jobs:
           echo "📚 Converting workbook to PDF..."
           pandoc docs/chrome_edu_workbook.md -o output/chrome_edu_workbook.pdf \
             --pdf-engine=wkhtmltopdf \
-            --margin-top=20mm \
-            --margin-bottom=20mm \
-            --margin-left=15mm \
-            --margin-right=15mm
+            -V margin-top=20mm \
+            -V margin-bottom=20mm \
+            -V margin-left=15mm \
+            -V margin-right=15mm
           echo "✅ PDF conversion completed"
         fi
         
