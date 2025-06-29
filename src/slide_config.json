@@ -1,0 +1,132 @@
+{
+  "title": "수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로 — 디지털 도구 완전정복",
+  "subtitle": "한글학교 선생님을 위한 크롬 웹브라우저 활용 교육",
+  "slides": [
+    {
+      "id": "title_slide",
+      "title": "타이틀 슬라이드",
+      "type": "title",
+      "content": {
+        "main_title": "수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로",
+        "subtitle": "디지털 도구 완전정복",
+        "description": "한글학교 선생님을 위한 크롬 웹브라우저 활용 교육"
+      }
+    },
+    {
+      "id": "course_overview",
+      "title": "강의 개요",
+      "type": "content",
+      "content": {
+        "sections": [
+          "교육 목표 및 대상",
+          "기초-중급-고급 단계별 구성",
+          "실습 중심의 학습 방법",
+          "지속적인 학습을 위한 커뮤니티"
+        ]
+      }
+    },
+    {
+      "id": "basic_features",
+      "title": "기초 단계: 크롬 브라우저 기본 기능",
+      "type": "content",
+      "content": {
+        "features": [
+          "프로필 관리",
+          "북마크 활용",
+          "단축키 활용",
+          "기본 설정 최적화"
+        ]
+      }
+    },
+    {
+      "id": "extensions_intro",
+      "title": "중급 단계: 교육자를 위한 확장프로그램",
+      "type": "content",
+      "content": {
+        "extensions": [
+          "Fireshot - 웹페이지 캡처",
+          "Google Keep - 메모 및 스크랩",
+          "Video Speed Controller - 동영상 속도 조절",
+          "Mote - 음성 피드백"
+        ]
+      }
+    },
+    {
+      "id": "korean_edu_tools",
+      "title": "중급 단계: 한글교육 특화 웹도구",
+      "type": "content",
+      "content": {
+        "tools": [
+          "스터디코리안넷",
+          "한국어교수학습샘터",
+          "NAKS 온라인 자료실",
+          "한글또박또박"
+        ]
+      }
+    },
+    {
+      "id": "advanced_collab",
+      "title": "고급 단계: 구글 워크스페이스 연동",
+      "type": "content",
+      "content": {
+        "workspace_tools": [
+          "구글 클래스룸",
+          "구글 문서/슬라이드",
+          "구글 드라이브",
+          "구글 미트"
+        ]
+      }
+    },
+    {
+      "id": "ai_tools",
+      "title": "고급 단계: AI 도구 활용",
+      "type": "content",
+      "content": {
+        "ai_tools": [
+          "Brisk Teaching - AI 교사 어시스턴트",
+          "ChatGPT - 교육 자료 생성",
+          "Canva AI - 시각적 자료 제작",
+          "음성 인식/합성 도구"
+        ]
+      }
+    },
+    {
+      "id": "practice_scenarios",
+      "title": "실습 시나리오",
+      "type": "content",
+      "content": {
+        "scenarios": [
+          "새 학기 준비 (기초)",
+          "효율적인 수업 자료 준비 (중급)",
+          "온라인 수업 진행 (중급)",
+          "학급 관리 시스템 구축 (고급)"
+        ]
+      }
+    },
+    {
+      "id": "resources",
+      "title": "추가 자료 및 참고 링크",
+      "type": "content",
+      "content": {
+        "resources": [
+          "크롬 브라우저 공식 자료",
+          "한글교육 자료",
+          "디지털 교육 도구",
+          "교사 커뮤니티"
+        ]
+      }
+    },
+    {
+      "id": "qa_contact",
+      "title": "질문 및 연락처",
+      "type": "contact",
+      "content": {
+        "contact_info": [
+          "이메일: support@koreanedu.org",
+          "전화: 02-123-4567",
+          "웹사이트: www.koreanedu.org"
+        ]
+      }
+    }
+  ]
+}
