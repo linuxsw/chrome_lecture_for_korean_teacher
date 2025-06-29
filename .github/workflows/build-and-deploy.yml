@@ -1,55 +1,137 @@
-name: Build and Deploy
+name: Build and Deploy Enhanced Chrome Education Materials
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
   pull_request:
-    branches: [main, master]
+    branches: [ main, master ]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wkhtmltopdf pandoc bc
+        # 한글 폰트 설치 (PDF 한글 지원)
+        sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+        sudo fc-cache -fv
+        echo "✅ System dependencies installed"
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install python-pptx pillow weasyprint markdown reportlab
+        echo "✅ Python dependencies installed"
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Set build timestamp
+      run: echo "TIMESTAMP=$(date '+%Y%m%d_%H%M')" >> $GITHUB_ENV
+        
+    - name: Create directories
+      run: |
+        mkdir -p output docs
+        echo "✅ Directories created"
+      
+    - name: Generate enhanced materials
+      run: |
+        echo "🚀 Starting enhanced material generation..."
+        
+        # 향상된 자료 생성 스크립트 실행
+        bash scripts/generate_materials_enhanced.sh
+        
+        echo "✅ Enhanced material generation completed"
+        
+    - name: Verify generated files
+      run: |
+        echo "📋 Generated files verification:"
+        echo "----------------------------------------"
+        
+        if [ -f "output/index.html" ]; then
+          size=$(stat -c%s "output/index.html")
+          echo "✅ HTML Index: $(printf "%'d" $size) bytes"
+        else
+          echo "❌ HTML Index: Missing"
+        fi
+        
+        if [ -f "output/chrome_education_slides.pptx" ]; then
+          size=$(stat -c%s "output/chrome_education_slides.pptx")
+          mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
+          echo "✅ PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
+        else
+          echo "❌ PowerPoint: Missing"
+        fi
+        
+        if [ -f "output/chrome_edu_workbook.pdf" ]; then
+          size=$(stat -c%s "output/chrome_edu_workbook.pdf")
+          kb=$(echo "scale=1; $size / 1024" | bc -l)
+          echo "✅ PDF Workbook: $(printf "%'d" $size) bytes (${kb} KB)"
+        else
+          echo "⚠️ PDF Workbook: Missing (optional)"
+        fi
+        
+        # HTML 슬라이드 파일들 개수
+        html_count=$(find output -name "*.html" -not -name "index.html" | wc -l)
+        echo "✅ HTML Slides: ${html_count} files"
+        
+        # Assets 확인
+        if [ -d "output/assets" ]; then
+          asset_count=$(find output/assets -type f | wc -l)
+          echo "✅ Assets: ${asset_count} files"
+        fi
+        
+        # 이미지 확인
+        if [ -d "output/images" ]; then
+          image_count=$(find output/images -type f | wc -l)
+          echo "✅ Images: ${image_count} files"
+        fi
+        
+        echo "----------------------------------------"
+        echo "📂 Complete file listing:"
+        ls -la output/
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      with:
+        enablement: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: './output'
+        name: chrome-edu-materials-${{ env.TIMESTAMP }}
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc weasyprint xelatex fonts-noto-cjk
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
 
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install markdown weasyprint
-
-      - name: Generate materials
-        run: |
-          bash scripts/generate_materials.sh
-          python scripts/generate_slides.py
-
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./output
-          force_orphan: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'docs: update generated materials'
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: generated-materials
-          path: |
-            output/*.html
-            output/*.pdf
-            output/images/
