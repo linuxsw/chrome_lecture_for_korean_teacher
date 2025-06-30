@@ -20,7 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,17 +51,20 @@ jobs:
       - name: Generate education materials
         run: |
           echo "🚀 Starting material generation..."
-          
-          # 로컬 빌드와 동일한 방식으로 실행
+
+          # Bash 스크립트 실행 (PDF/PPTX 생성 및 슬라이드 복사)
           bash scripts/generate_materials.sh
-          
+
+          # Python 스크립트 실행 (메인 인덱스 생성 및 build_info.json 업데이트)
+          python scripts/generate_slides.py
+
           echo "✅ Material generation completed"
 
       - name: Verify generated files
         run: |
           echo "📋 Generated files verification:"
           echo "----------------------------------------"
-          
+
           # 메인 인덱스 파일 확인
           if [ -f "output/index.html" ]; then
             size=$(stat -c%s "output/index.html")
@@ -70,7 +73,7 @@ jobs:
             echo "❌ Main Index: Missing"
             exit 1
           fi
-          
+
           # PowerPoint 파일 확인
           PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
           if [ -n "$PPTX_FILE" ]; then
@@ -81,7 +84,7 @@ jobs:
           else
             echo "⚠️ PowerPoint: Missing"
           fi
-          
+
           # PDF 파일 확인
           PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
           if [ -n "$PDF_FILE" ]; then
@@ -92,22 +95,22 @@ jobs:
           else
             echo "⚠️ PDF Workbook: Missing"
           fi
-          
+
           # HTML 슬라이드 파일들 확인
           html_count=$(find output -name "[0-9][0-9]_*.html" | wc -l)
           echo "✅ HTML Slides: ${html_count} files"
-          
+
           # build_info.json 확인
           if [ -f "output/build_info.json" ]; then
             echo "✅ Build Info: Available"
           else
             echo "⚠️ Build Info: Missing"
           fi
-          
+
           echo "----------------------------------------"
           echo "📂 Complete file listing:"
           ls -la output/ | head -20
-          
+
           if [ $(ls output/ | wc -l) -gt 20 ]; then
             echo "... and $(( $(ls output/ | wc -l) - 20 )) more files"
           fi
@@ -132,11 +135,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        
+
       - name: Display deployment URL
         run: |
           echo "🌐 Deployment successful!"
           echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
           echo "🎯 Main page: ${{ steps.deployment.outputs.page_url }}"
           echo "📊 Slides: ${{ steps.deployment.outputs.page_url }}slides_index.html"
-

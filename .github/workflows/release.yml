@@ -18,7 +18,7 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,29 +48,29 @@ jobs:
       - name: Prepare release assets
         run: |
           echo "📦 Preparing release assets..."
-          
+
           # 릴리즈용 디렉토리 생성
           mkdir -p release-assets
-          
+
           # PowerPoint 파일 복사
           PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
           if [ -n "$PPTX_FILE" ]; then
             cp "$PPTX_FILE" release-assets/chrome_education_slides.pptx
             echo "✅ PowerPoint file prepared"
           fi
-          
+
           # PDF 파일 복사
           PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
           if [ -n "$PDF_FILE" ]; then
             cp "$PDF_FILE" release-assets/chrome_edu_workbook.pdf
             echo "✅ PDF file prepared"
           fi
-          
+
           # HTML 슬라이드 압축
           cd output
           zip -r ../release-assets/chrome_education_slides_html.zip *.html images/ -x "chrome_*.html" "curriculum_*.html"
           cd ..
-          
+
           echo "✅ Release assets prepared"
 
       - name: Get file information
@@ -79,19 +79,19 @@ jobs:
           PPTX_FILE="release-assets/chrome_education_slides.pptx"
           PDF_FILE="release-assets/chrome_edu_workbook.pdf"
           ZIP_FILE="release-assets/chrome_education_slides_html.zip"
-          
+
           if [ -f "$PPTX_FILE" ]; then
             size=$(stat -c%s "$PPTX_FILE")
             PPTX_SIZE="$(awk "BEGIN {printf \"%.1f\", $size / 1024 / 1024}") MB"
             echo "pptx_size=$PPTX_SIZE" >> $GITHUB_OUTPUT
           fi
-          
+
           if [ -f "$PDF_FILE" ]; then
             size=$(stat -c%s "$PDF_FILE")
             PDF_SIZE="$(awk "BEGIN {printf \"%.1f\", $size / 1024}") KB"
             echo "pdf_size=$PDF_SIZE" >> $GITHUB_OUTPUT
           fi
-          
+
           if [ -f "$ZIP_FILE" ]; then
             size=$(stat -c%s "$ZIP_FILE")
             HTML_SIZE="$(awk "BEGIN {printf \"%.1f\", $size / 1024}") KB"
@@ -99,6 +99,7 @@ jobs:
           fi
 
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,25 +108,25 @@ jobs:
           release_name: Chrome Education Materials ${{ github.event.inputs.tag_name || github.ref_name }}
           body: |
             # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료
-            
+
             ## 📚 포함된 자료
-            
+
             - **PowerPoint 프레젠테이션** (${{ steps.file_info.outputs.pptx_size }}): 오프라인 강의용 슬라이드
             - **실습 워크북 PDF** (${{ steps.file_info.outputs.pdf_size }}): 단계별 실습 가이드
             - **HTML 슬라이드** (${{ steps.file_info.outputs.html_size }}): 웹 기반 프레젠테이션
-            
+
             ## 🌐 온라인 버전
-            
+
             - [GitHub Pages에서 보기](https://linuxsw.github.io/chrome_lecture_for_korean_teacher/)
-            
+
             ## 📖 사용 방법
-            
+
             1. **PowerPoint**: 다운로드 후 바로 강의에 사용
             2. **PDF 워크북**: 실습 가이드로 활용
             3. **HTML 슬라이드**: 압축 해제 후 index.html 실행
-            
+
             ---
-            
+
             생성일: $(date '+%Y년 %m월 %d일')
           draft: false
           prerelease: false
@@ -162,4 +163,3 @@ jobs:
           asset_path: ./release-assets/chrome_education_slides_html.zip
           asset_name: chrome_education_slides_html.zip
           asset_content_type: application/zip
-
