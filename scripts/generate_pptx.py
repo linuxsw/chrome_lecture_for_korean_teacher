@@ -22,20 +22,9 @@ class ChromeEducationPPTXGenerator:
         self.output_dir = self.project_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
         
-        # 템플릿 파일 확인
-        template_path = Path(__file__).parent.parent / "templates" / "sample.pptx"
-        if template_path.exists():
-            print("✨ 템플릿 파일을 사용하여 프레젠테이션 생성")
-            self.prs = Presentation(str(template_path))
-            # 기존 슬라이드 모두 삭제 (템플릿의 레이아웃만 사용)
-            slide_count = len(self.prs.slides)
-            for i in range(slide_count - 1, -1, -1):
-                rId = self.prs.slides._sldIdLst[i].rId
-                self.prs.part.drop_rel(rId)
-                del self.prs.slides._sldIdLst[i]
-        else:
-            print("⚠️  템플릿 파일을 찾을 수 없어 기본 템플릿 사용")
-            self.prs = Presentation()
+        # 기본 프레젠테이션 사용 (템플릿 문제로 인해)
+        print("🎯 기본 프레젠테이션 템플릿 사용")
+        self.prs = Presentation()
         
         # 색상 정의 (Chrome 브랜드 컬러)
         self.colors = {
@@ -59,11 +48,15 @@ class ChromeEducationPPTXGenerator:
         title = None
         content = None
         
-        for shape in slide.placeholders:
-            if shape.placeholder_format.type == 1:  # Title
-                title = shape
-            elif shape.placeholder_format.type == 2:  # Body/Content
-                content = shape
+        # 먼저 shapes.title과 shapes.placeholders를 시도
+        if hasattr(slide.shapes, 'title'):
+            title = slide.shapes.title
+        
+        # placeholders에서 content 찾기
+        for i, placeholder in enumerate(slide.placeholders):
+            if i == 1 and content is None:  # 두 번째 placeholder는 보통 content
+                content = placeholder
+                break
         
         return title, content
     
@@ -72,15 +65,9 @@ class ChromeEducationPPTXGenerator:
         slide_layout = self.get_safe_layout(0)  # Title Slide
         slide = self.prs.slides.add_slide(slide_layout)
         
-        # placeholder를 안전하게 찾기
-        title = None
-        subtitle = None
-        
-        for shape in slide.placeholders:
-            if shape.placeholder_format.type == 1:  # Title
-                title = shape
-            elif shape.placeholder_format.type == 2:  # Subtitle/Body
-                subtitle = shape
+        # 직접 title과 subtitle 접근
+        title = slide.shapes.title
+        subtitle = slide.placeholders[1] if len(slide.placeholders) > 1 else None
         
         if title:
             title.text = "수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로"

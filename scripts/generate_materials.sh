@@ -141,7 +141,6 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
         if command -v pandoc &> /dev/null; then
             pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.html" \
                 --standalone \
-                --css="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700" \
                 --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
             
             # HTML을 PDF로 변환 (한글 폰트 지원)
