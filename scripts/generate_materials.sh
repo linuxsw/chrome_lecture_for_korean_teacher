@@ -129,9 +129,10 @@ echo "✅ 슬라이드 인덱스 생성 완료"
 if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     echo "📚 워크북 PDF 생성 중..."
     
-    # 날짜와 시간이 포함된 파일명 생성
+    # 변수 초기화
     TIMESTAMP=$(date +"%Y%m%d_%H%M")
     PDF_FILENAME="chrome_edu_workbook_${TIMESTAMP}.pdf"
+    HAS_ERROR=0
     
     # weasyprint 우선 시도 (한글 지원 우수)
     if command -v weasyprint &> /dev/null; then
@@ -145,39 +146,40 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
             
             # HTML을 PDF로 변환 (한글 폰트 지원)
             if command -v weasyprint &> /dev/null; then
+                echo "🔧 weasyprint로 PDF 생성 시도..."
                 if weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/$PDF_FILENAME"; then
                     echo "✅ weasyprint로 PDF 생성 완료: $PDF_FILENAME"
                 else
-                    echo "⚠️  weasyprint로 PDF 생성 실패, pandoc으로 시도합니다..."
-                    pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
+                    echo "⚠️  weasyprint로 PDF 생성 실패"
+                    HAS_ERROR=1
+                fi
+            fi
+
+            if [ "$HAS_ERROR" = "1" ] || ! command -v weasyprint &> /dev/null; then
+                echo "🔧 pandoc으로 PDF 생성 시도..."
+                if command -v pandoc &> /dev/null && command -v xelatex &> /dev/null; then
+                    pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
+                        -o "$OUTPUT_DIR/$PDF_FILENAME" \
                         --pdf-engine=xelatex \
                         --variable mainfont="Noto Sans CJK KR" \
                         --variable sansfont="Noto Sans CJK KR" \
                         --variable monofont="Noto Sans Mono CJK KR" \
                         --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
+                    
                     if [ $? -eq 0 ]; then
                         echo "✅ pandoc으로 PDF 생성 완료: $PDF_FILENAME"
                     else
-                        echo "❌ PDF 생성 실패"
+                        echo "❌ pandoc으로 PDF 생성 실패"
                         exit 1
                     fi
-                fi
-            else
-                echo "⚠️  weasyprint를 찾을 수 없습니다. pandoc으로 시도합니다..."
-                pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
-                    --pdf-engine=xelatex \
-                    --variable mainfont="Noto Sans CJK KR" \
-                    --variable sansfont="Noto Sans CJK KR" \
-                    --variable monofont="Noto Sans Mono CJK KR" \
-                    --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
-                if [ $? -eq 0 ]; then
-                    echo "✅ pandoc으로 PDF 생성 완료: $PDF_FILENAME"
                 else
-                    echo "❌ PDF 생성 실패"
+                    echo "❌ PDF 생성 도구를 찾을 수 없습니다"
                     exit 1
                 fi
             fi
-            rm -f "$OUTPUT_DIR/chrome_edu_workbook.html"  # 임시 HTML 파일 삭제
+
+            # 임시 파일 정리
+            rm -f "$OUTPUT_DIR/chrome_edu_workbook.html"
         else
             echo "⚠️  pandoc을 찾을 수 없습니다."
         fi
