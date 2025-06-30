@@ -268,6 +268,43 @@ class ChromeEducationSlidesGenerator:
             background-clip: text;
         }}
     </style>
+    <script>
+        function findAndOpenPDF() {{
+            fetch('build_info.json')
+                .then(response => response.json())
+                .then(info => {{
+                    const files = info.generated_files;
+                    const pdfFile = files.find(f => f.includes('workbook') && f.endsWith('.pdf'));
+                    if (pdfFile) {{
+                        window.open(pdfFile, '_blank');
+                    }} else {{
+                        alert('PDF 파일을 찾을 수 없습니다.');
+                    }}
+                }})
+                .catch(error => {{
+                    console.error('Error:', error);
+                    alert('PDF 파일을 찾는 중 오류가 발생했습니다.');
+                }});
+        }}
+
+        function findAndOpenPPTX() {{
+            fetch('build_info.json')
+                .then(response => response.json())
+                .then(info => {{
+                    const files = info.generated_files;
+                    const pptxFile = files.find(f => f.includes('slides') && f.endsWith('.pptx'));
+                    if (pptxFile) {{
+                        window.open(pptxFile, '_blank');
+                    }} else {{
+                        alert('PowerPoint 파일을 찾을 수 없습니다.');
+                    }}
+                }})
+                .catch(error => {{
+                    console.error('Error:', error);
+                    alert('PowerPoint 파일을 찾는 중 오류가 발생했습니다.');
+                }});
+        }}
+    </script>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8">
@@ -335,8 +372,8 @@ class ChromeEducationSlidesGenerator:
                 <i class="fas fa-book-open mr-3 text-blue-500"></i>추가 자료
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="chrome_edu_workbook.pdf" target="_blank" 
-                   class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-lg hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg">
+                <a href="#" onclick="findAndOpenPDF()" 
+                   class="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-lg hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer">
                     <div class="text-center">
                         <i class="fas fa-file-pdf text-4xl mb-4"></i>
                         <h3 class="font-bold text-xl mb-2">실습 워크북</h3>
@@ -355,13 +392,13 @@ class ChromeEducationSlidesGenerator:
                     </div>
                 </a>
                 
-                <a href="curriculum_design.html" target="_blank" 
-                   class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+                <a href="#" onclick="findAndOpenPPTX()" 
+                   class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg hover:from-purple-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer">
                     <div class="text-center">
-                        <i class="fas fa-chalkboard-teacher text-4xl mb-4"></i>
-                        <h3 class="font-bold text-xl mb-2">커리큘럼 설계</h3>
-                        <p class="text-sm opacity-90">체계적인 교육 과정 설계</p>
-                        <div class="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1">HTML 문서</div>
+                        <i class="fas fa-file-powerpoint text-4xl mb-4"></i>
+                        <h3 class="font-bold text-xl mb-2">PowerPoint 슬라이드</h3>
+                        <p class="text-sm opacity-90">오프라인 프레젠테이션용</p>
+                        <div class="mt-3 text-xs bg-white bg-opacity-20 rounded px-2 py-1">PPTX 파일</div>
                     </div>
                 </a>
             </div>
@@ -394,6 +431,18 @@ class ChromeEducationSlidesGenerator:
         config = self.get_slide_config()
         
         current_date = datetime.now()
+        timestamp = current_date.strftime("%Y%m%d_%H%M")
+        
+        # 실제 생성된 파일들 확인
+        generated_files = ["index.html", "slide_config.json"]
+        
+        # 타임스탬프가 포함된 파일명들 추가
+        pdf_file = f"chrome_edu_workbook_{timestamp}.pdf"
+        pptx_file = f"chrome_education_slides_{timestamp}.pptx"
+        
+        generated_files.extend([pdf_file, pptx_file])
+        generated_files.extend([f"{i+1:02d}_{slide['id']}.html" for i, slide in enumerate(config["slides"])])
+        
         build_info = {
             "build_date": current_date.isoformat(),
             "build_date_formatted": current_date.strftime("%Y년 %m월 %d일 %H:%M"),
@@ -402,11 +451,7 @@ class ChromeEducationSlidesGenerator:
             "subtitle": config["subtitle"],
             "slides_count": len(config["slides"]),
             "slides": [slide["id"] for slide in config["slides"]],
-            "generated_files": [
-                "index.html",
-                "slide_config.json",
-                "chrome_edu_workbook.pdf"
-            ] + [f"{slide['id']}.html" for slide in config["slides"]]
+            "generated_files": generated_files
         }
         
         build_file = self.output_dir / "build_info.json"
