@@ -2,7 +2,7 @@ name: Build and Deploy Chrome Education Materials
 
 on:
   push:
-    branches: [main, master, dev, dev3]
+    branches: [main, master, dev]
   pull_request:
     branches: [main, master]
   workflow_dispatch:
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,9 +33,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf pandoc
-          # 한글 폰트 설치 (PDF 한글 지원)
-          sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+          sudo apt-get install -y wkhtmltopdf pandoc fonts-noto-cjk fonts-noto-cjk-extra
           sudo fc-cache -fv
           echo "✅ System dependencies installed"
 
@@ -45,94 +43,82 @@ jobs:
           pip install python-pptx pillow weasyprint markdown reportlab
           echo "✅ Python dependencies installed"
 
-      - name: Set build timestamp
-        run: echo "TIMESTAMP=$(date '+%Y%m%d_%H%M')" >> $GITHUB_ENV
-
-      - name: Create directories
+      - name: Create output directory
         run: |
-          mkdir -p output docs
-          echo "✅ Directories created"
+          mkdir -p output
+          echo "✅ Output directory created"
 
-      - name: Generate materials
+      - name: Generate education materials
         run: |
           echo "🚀 Starting material generation..."
-
-          # Python 스크립트 실행 (메인 인덱스 생성 및 build_info.json 업데이트)
-          python scripts/generate_slides.py
-
-          # Bash 스크립트 실행 (PDF/PPTX 생성 및 슬라이드 복사)
+          
+          # 로컬 빌드와 동일한 방식으로 실행
           bash scripts/generate_materials.sh
-
+          
           echo "✅ Material generation completed"
 
       - name: Verify generated files
         run: |
           echo "📋 Generated files verification:"
           echo "----------------------------------------"
-
-          # 현재 날짜와 시간 형식의 타임스탬프
-          TIMESTAMP=$(date +"%Y%m%d_%H%M")
-
+          
+          # 메인 인덱스 파일 확인
           if [ -f "output/index.html" ]; then
             size=$(stat -c%s "output/index.html")
-            echo "✅ HTML Index: $(printf "%'d" $size) bytes"
+            echo "✅ Main Index: $(printf "%'d" $size) bytes"
           else
-            echo "❌ HTML Index: Missing"
+            echo "❌ Main Index: Missing"
+            exit 1
           fi
-
-          # PPTX 파일 확인 (타임스탬프 포함)
+          
+          # PowerPoint 파일 확인
           PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
           if [ -n "$PPTX_FILE" ]; then
             size=$(stat -c%s "$PPTX_FILE")
             mb=$(awk "BEGIN {printf \"%.1f\", $size / 1024 / 1024}")
             echo "✅ PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
-            echo "   파일: $(basename "$PPTX_FILE")"
+            echo "   File: $(basename "$PPTX_FILE")"
           else
-            echo "❌ PowerPoint: Missing"
+            echo "⚠️ PowerPoint: Missing"
           fi
-
-          # PDF 파일 확인 (타임스탬프 포함)
+          
+          # PDF 파일 확인
           PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
           if [ -n "$PDF_FILE" ]; then
             size=$(stat -c%s "$PDF_FILE")
             kb=$(awk "BEGIN {printf \"%.1f\", $size / 1024}")
             echo "✅ PDF Workbook: $(printf "%'d" $size) bytes (${kb} KB)"
-            echo "   파일: $(basename "$PDF_FILE")"
+            echo "   File: $(basename "$PDF_FILE")"
           else
-            echo "⚠️ PDF Workbook: Missing (optional)"
+            echo "⚠️ PDF Workbook: Missing"
           fi
-
-          # HTML 슬라이드 파일들 개수
-          html_count=$(find output -name "*.html" -not -name "index.html" | wc -l)
+          
+          # HTML 슬라이드 파일들 확인
+          html_count=$(find output -name "[0-9][0-9]_*.html" | wc -l)
           echo "✅ HTML Slides: ${html_count} files"
-
-          # Assets 확인
-          if [ -d "output/assets" ]; then
-            asset_count=$(find output/assets -type f | wc -l)
-            echo "✅ Assets: ${asset_count} files"
+          
+          # build_info.json 확인
+          if [ -f "output/build_info.json" ]; then
+            echo "✅ Build Info: Available"
+          else
+            echo "⚠️ Build Info: Missing"
           fi
-
-          # 이미지 확인
-          if [ -d "output/images" ]; then
-            image_count=$(find output/images -type f | wc -l)
-            echo "✅ Images: ${image_count} files"
-          fi
-
+          
           echo "----------------------------------------"
           echo "📂 Complete file listing:"
-          ls -la output/
+          ls -la output/ | head -20
+          
+          if [ $(ls output/ | wc -l) -gt 20 ]; then
+            echo "... and $(( $(ls output/ | wc -l) - 20 )) more files"
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        with:
-          enablement: true
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './output'
-          name: chrome-edu-materials-${{ env.TIMESTAMP }}
 
   deploy:
     environment:
@@ -140,10 +126,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
-    # 임시로 모든 브랜치에서 배포 허용 (테스트용)
-    # if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
 
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: Display deployment URL
+        run: |
+          echo "🌐 Deployment successful!"
+          echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "🎯 Main page: ${{ steps.deployment.outputs.page_url }}"
+          echo "📊 Slides: ${{ steps.deployment.outputs.page_url }}slides_index.html"
+
