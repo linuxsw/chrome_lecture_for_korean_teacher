@@ -31,7 +31,15 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf pandoc fonts-noto-cjk fonts-noto-cjk-extra zip
+          sudo apt-get install -y \
+            wkhtmltopdf \
+            pandoc \
+            texlive-xetex \
+            texlive-fonts-recommended \
+            texlive-lang-cjk \
+            fonts-noto-cjk \
+            fonts-noto-cjk-extra \
+            zip
           sudo fc-cache -fv
 
       - name: Install Python dependencies
