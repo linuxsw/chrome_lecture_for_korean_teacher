@@ -214,21 +214,9 @@ fi
 echo "📄 메인 인덱스 페이지 생성 중..."
 python3 "$PROJECT_DIR/scripts/generate_slides.py"
 
-echo "ℹ️  빌드 정보 생성 중..."
-cat > "$OUTPUT_DIR/build_info.json" << EOF
-{
-    "build_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-    "build_date_formatted": "$(date +"%Y년 %m월 %d일 %H:%M")",
-    "build_version": "1.0.0",
-    "slides_count": ${#SLIDE_FILES[@]},
-    "generated_files": [
-        "index.html",
-        "slides_index.html",
-        "chrome_edu_workbook.pdf",
-        $(printf '"%s",' "${SLIDE_FILES[@]}" | sed 's/,$//')
-    ]
-}
-EOF
+echo "ℹ️  빌드 정보 업데이트 중..."
+# generate_slides.py에서 이미 build_info.json을 생성했으므로 여기서는 생략
+# 타임스탬프 파일명은 generate_slides.py에서 처리됨
 
 echo "🎉 교육 자료 생성 완료!"
 echo "📂 결과물 위치: $OUTPUT_DIR"
