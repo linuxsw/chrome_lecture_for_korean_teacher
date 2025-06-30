@@ -141,7 +141,7 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
         if command -v pandoc &> /dev/null; then
             pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.html" \
                 --standalone \
-                --css=https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700 \
+                --css="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700" \
                 --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
             
             # HTML을 PDF로 변환 (한글 폰트 지원)
@@ -244,12 +244,8 @@ if [[ -d "$DOCS_DIR" ]]; then
 fi
 
 # 6. 빌드 정보 생성
-echo "📄 메인 인덱스 페이지 생성 중..."
-python3 "$PROJECT_DIR/scripts/generate_slides.py"
-
 echo "ℹ️  빌드 정보 업데이트 중..."
-# generate_slides.py에서 이미 build_info.json을 생성했으므로 여기서는 생략
-# 타임스탬프 파일명은 generate_slides.py에서 처리됨
+# generate_slides.py는 워크플로우에서 이미 실행되었으므로 여기서는 생략
 
 echo "🎉 교육 자료 생성 완료!"
 echo "📂 결과물 위치: $OUTPUT_DIR"

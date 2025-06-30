@@ -33,7 +33,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf pandoc bc
+          sudo apt-get install -y wkhtmltopdf pandoc
           # 한글 폰트 설치 (PDF 한글 지원)
           sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
           sudo fc-cache -fv
@@ -57,11 +57,11 @@ jobs:
         run: |
           echo "🚀 Starting material generation..."
 
-          # Bash 스크립트 실행 (PDF/PPTX 생성 및 슬라이드 복사)
-          bash scripts/generate_materials.sh
-
           # Python 스크립트 실행 (메인 인덱스 생성 및 build_info.json 업데이트)
           python scripts/generate_slides.py
+
+          # Bash 스크립트 실행 (PDF/PPTX 생성 및 슬라이드 복사)
+          bash scripts/generate_materials.sh
 
           echo "✅ Material generation completed"
 
@@ -84,7 +84,7 @@ jobs:
           PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
           if [ -n "$PPTX_FILE" ]; then
             size=$(stat -c%s "$PPTX_FILE")
-            mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
+            mb=$(awk "BEGIN {printf \"%.1f\", $size / 1024 / 1024}")
             echo "✅ PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
             echo "   파일: $(basename "$PPTX_FILE")"
           else
@@ -95,7 +95,7 @@ jobs:
           PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
           if [ -n "$PDF_FILE" ]; then
             size=$(stat -c%s "$PDF_FILE")
-            kb=$(echo "scale=1; $size / 1024" | bc -l)
+            kb=$(awk "BEGIN {printf \"%.1f\", $size / 1024}")
             echo "✅ PDF Workbook: $(printf "%'d" $size) bytes (${kb} KB)"
             echo "   파일: $(basename "$PDF_FILE")"
           else
