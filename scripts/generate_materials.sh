@@ -3,8 +3,6 @@
 # Chrome Education Materials Generator
 # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 생성 스크립트
 
-# set -e 제거 - 오류가 발생해도 계속 진행하도록 함
-
 echo "🚀 Chrome Education Materials Generator 시작"
 
 # 프로젝트 디렉토리 설정
@@ -125,32 +123,6 @@ EOF
 
 echo "✅ 슬라이드 인덱스 생성 완료"
 
-    # 필요한 도구 확인
-    if ! command -v pandoc &> /dev/null || ! command -v xelatex &> /dev/null; then
-        echo "⚠️  pandoc 또는 xelatex가 설치되어 있지 않습니다."
-        echo "macOS의 경우: brew install pandoc && brew install --cask mactex"
-        echo "Ubuntu의 경우: sudo apt-get install pandoc texlive-xetex"
-        echo "PDF 생성을 건너뜁니다."
-    else
-        echo "🔧 pandoc + xelatex로 PDF 생성 중..."
-        if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
-            -o "$OUTPUT_DIR/$PDF_FILENAME" \
->>>>>>> 1c82e26 (Fix PDF Korean font issues, add PPTX generation, and update documentation)
-            --pdf-engine=xelatex \
-            --variable mainfont="Noto Sans CJK KR" \
-            --variable lang=ko \
-            --toc \
-            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북" \
-            --metadata author="Chrome Education Team" \
-            --metadata date="$(date '+%Y년 %m월 %d일')"
-        then
-            echo "✅ PDF 생성 완료: $PDF_FILENAME"
-        else
-            echo "⚠️  PDF 생성 실패, 계속 진행합니다..."
-        fi
-    fi
-fi
-=======
 # 3. 워크북 PDF 생성 (한글 지원 개선)
 if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     echo "📚 워크북 PDF 생성 중..."
@@ -169,32 +141,6 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
         echo "🔧 pandoc + xelatex로 PDF 생성 중..."
         if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
             -o "$OUTPUT_DIR/$PDF_FILENAME" \
-            --pdf-engine=xelatex \
-            --variable mainfont="Noto Sans CJK KR" \
-            --variable lang=ko \
-            --toc \
-            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북" \
-            --metadata author="Chrome Education Team" \
-            --metadata date="$(date '+%Y년 %m월 %d일')"
-        then
-            echo "✅ PDF 생성 완료: $PDF_FILENAME"
-        else
-            echo "⚠️  PDF 생성 실패, 계속 진행합니다..."
-        fi
-    fi
-fi
-=======
-    # 필요한 도구 확인
-    if ! command -v pandoc &> /dev/null || ! command -v xelatex &> /dev/null; then
-        echo "⚠️  pandoc 또는 xelatex가 설치되어 있지 않습니다."
-        echo "macOS의 경우: brew install pandoc && brew install --cask mactex"
-        echo "Ubuntu의 경우: sudo apt-get install pandoc texlive-xetex"
-        echo "PDF 생성을 건너뜁니다."
-    else
-        echo "🔧 pandoc + xelatex로 PDF 생성 중..."
-        if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
-            -o "$OUTPUT_DIR/$PDF_FILENAME" \
->>>>>>> 1c82e26 (Fix PDF Korean font issues, add PPTX generation, and update documentation)
             --pdf-engine=xelatex \
             --variable mainfont="Noto Sans CJK KR" \
             --variable lang=ko \
@@ -280,4 +226,3 @@ echo "🌐 슬라이드 인덱스: $OUTPUT_DIR/slides_index.html"
 echo ""
 echo "📋 생성된 파일 목록:"
 ls -la "$OUTPUT_DIR"
-
