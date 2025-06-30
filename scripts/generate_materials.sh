@@ -3,7 +3,7 @@
 # Chrome Education Materials Generator
 # 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 자료 생성 스크립트
 
-set -e
+# set -e 제거 - 오류가 발생해도 계속 진행하도록 함
 
 echo "🚀 Chrome Education Materials Generator 시작"
 
@@ -125,6 +125,32 @@ EOF
 
 echo "✅ 슬라이드 인덱스 생성 완료"
 
+    # 필요한 도구 확인
+    if ! command -v pandoc &> /dev/null || ! command -v xelatex &> /dev/null; then
+        echo "⚠️  pandoc 또는 xelatex가 설치되어 있지 않습니다."
+        echo "macOS의 경우: brew install pandoc && brew install --cask mactex"
+        echo "Ubuntu의 경우: sudo apt-get install pandoc texlive-xetex"
+        echo "PDF 생성을 건너뜁니다."
+    else
+        echo "🔧 pandoc + xelatex로 PDF 생성 중..."
+        if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
+            -o "$OUTPUT_DIR/$PDF_FILENAME" \
+>>>>>>> 1c82e26 (Fix PDF Korean font issues, add PPTX generation, and update documentation)
+            --pdf-engine=xelatex \
+            --variable mainfont="Noto Sans CJK KR" \
+            --variable lang=ko \
+            --toc \
+            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북" \
+            --metadata author="Chrome Education Team" \
+            --metadata date="$(date '+%Y년 %m월 %d일')"
+        then
+            echo "✅ PDF 생성 완료: $PDF_FILENAME"
+        else
+            echo "⚠️  PDF 생성 실패, 계속 진행합니다..."
+        fi
+    fi
+fi
+=======
 # 3. 워크북 PDF 생성 (한글 지원 개선)
 if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     echo "📚 워크북 PDF 생성 중..."
@@ -132,78 +158,54 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     # 변수 초기화
     TIMESTAMP=$(date +"%Y%m%d_%H%M")
     PDF_FILENAME="chrome_edu_workbook_${TIMESTAMP}.pdf"
-    HAS_ERROR=0
     
-    # weasyprint 우선 시도 (한글 지원 우수)
-    if command -v weasyprint &> /dev/null; then
-        echo "🔧 weasyprint를 사용하여 PDF 생성 중..."
-        # 먼저 markdown을 HTML로 변환
-        if command -v pandoc &> /dev/null; then
-            pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.html" \
-                --standalone \
-                --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
-            
-            # HTML을 PDF로 변환 (한글 폰트 지원)
-            if command -v weasyprint &> /dev/null; then
-                echo "🔧 weasyprint로 PDF 생성 시도..."
-                if weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/$PDF_FILENAME"; then
-                    echo "✅ weasyprint로 PDF 생성 완료: $PDF_FILENAME"
-                else
-                    echo "⚠️  weasyprint로 PDF 생성 실패"
-                    HAS_ERROR=1
-                fi
-            fi
-
-            if [ "$HAS_ERROR" = "1" ] || ! command -v weasyprint &> /dev/null; then
-                echo "🔧 pandoc으로 PDF 생성 시도..."
-                if command -v pandoc &> /dev/null && command -v xelatex &> /dev/null; then
-                    pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
-                        -o "$OUTPUT_DIR/$PDF_FILENAME" \
-                        --pdf-engine=xelatex \
-                        --variable mainfont="Noto Sans CJK KR" \
-                        --variable sansfont="Noto Sans CJK KR" \
-                        --variable monofont="Noto Sans Mono CJK KR" \
-                        --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
-                    
-                    if [ $? -eq 0 ]; then
-                        echo "✅ pandoc으로 PDF 생성 완료: $PDF_FILENAME"
-                    else
-                        echo "❌ pandoc으로 PDF 생성 실패"
-                        exit 1
-                    fi
-                else
-                    echo "❌ PDF 생성 도구를 찾을 수 없습니다"
-                    exit 1
-                fi
-            fi
-
-            # 임시 파일 정리
-            rm -f "$OUTPUT_DIR/chrome_edu_workbook.html"
-        else
-            echo "⚠️  pandoc을 찾을 수 없습니다."
-        fi
-    # pandoc 단독 사용 (두 번째 옵션)
-    elif command -v pandoc &> /dev/null; then
-        echo "🔧 pandoc을 사용하여 PDF 생성 중..."
-        pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
+    # 필요한 도구 확인
+    if ! command -v pandoc &> /dev/null || ! command -v xelatex &> /dev/null; then
+        echo "⚠️  pandoc 또는 xelatex가 설치되어 있지 않습니다."
+        echo "macOS의 경우: brew install pandoc && brew install --cask mactex"
+        echo "Ubuntu의 경우: sudo apt-get install pandoc texlive-xetex"
+        echo "PDF 생성을 건너뜁니다."
+    else
+        echo "🔧 pandoc + xelatex로 PDF 생성 중..."
+        if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
+            -o "$OUTPUT_DIR/$PDF_FILENAME" \
             --pdf-engine=xelatex \
             --variable mainfont="Noto Sans CJK KR" \
-            --variable sansfont="Noto Sans CJK KR" \
-            --variable monofont="Noto Sans Mono CJK KR" \
-            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
-        echo "✅ pandoc으로 워크북 PDF 생성 완료: $PDF_FILENAME"
-    # manus-md-to-pdf 사용 (세 번째 옵션)
-    elif command -v manus-md-to-pdf &> /dev/null; then
-        echo "🔧 manus-md-to-pdf를 사용하여 PDF 생성 중..."
-        manus-md-to-pdf "$DOCS_DIR/chrome_edu_workbook.md" "$OUTPUT_DIR/$PDF_FILENAME"
-        echo "✅ manus-md-to-pdf로 워크북 PDF 생성 완료: $PDF_FILENAME"
-    else
-        echo "⚠️  PDF 생성 도구를 찾을 수 없습니다. 기존 PDF를 복사합니다."
-        if [[ -f "$DOCS_DIR/chrome_edu_workbook.pdf" ]]; then
-            cp "$DOCS_DIR/chrome_edu_workbook.pdf" "$OUTPUT_DIR/$PDF_FILENAME"
-            echo "✅ 기존 PDF 파일 복사 완료: $PDF_FILENAME"
+            --variable lang=ko \
+            --toc \
+            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북" \
+            --metadata author="Chrome Education Team" \
+            --metadata date="$(date '+%Y년 %m월 %d일')"
+        then
+            echo "✅ PDF 생성 완료: $PDF_FILENAME"
         else
-            echo "❌ 기존 PDF 파일도 찾을 수 없습니다."
+            echo "⚠️  PDF 생성 실패, 계속 진행합니다..."
+        fi
+    fi
+fi
+=======
+    # 필요한 도구 확인
+    if ! command -v pandoc &> /dev/null || ! command -v xelatex &> /dev/null; then
+        echo "⚠️  pandoc 또는 xelatex가 설치되어 있지 않습니다."
+        echo "macOS의 경우: brew install pandoc && brew install --cask mactex"
+        echo "Ubuntu의 경우: sudo apt-get install pandoc texlive-xetex"
+        echo "PDF 생성을 건너뜁니다."
+    else
+        echo "🔧 pandoc + xelatex로 PDF 생성 중..."
+        if pandoc "$DOCS_DIR/chrome_edu_workbook.md" \
+            -o "$OUTPUT_DIR/$PDF_FILENAME" \
+>>>>>>> 1c82e26 (Fix PDF Korean font issues, add PPTX generation, and update documentation)
+            --pdf-engine=xelatex \
+            --variable mainfont="Noto Sans CJK KR" \
+            --variable lang=ko \
+            --toc \
+            --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북" \
+            --metadata author="Chrome Education Team" \
+            --metadata date="$(date '+%Y년 %m월 %d일')"
+        then
+            echo "✅ PDF 생성 완료: $PDF_FILENAME"
+        else
+            echo "⚠️  PDF 생성 실패, 계속 진행합니다..."
         fi
     fi
 fi
@@ -226,25 +228,49 @@ echo "📋 슬라이드 파일 복사 중..."
 for i in "${!SLIDE_FILES[@]}"; do
     src="$SLIDES_DIR/${SLIDE_FILES[$i]}"
     dst="$OUTPUT_DIR/$(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]}"
-    cp "$src" "$dst"
-    echo "  📄 $(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]} 복사 완료"
+    if [[ -f "$src" ]]; then
+        cp "$src" "$dst"
+        echo "  ✅ $(printf "%02d" $((i+1)))_${SLIDE_FILES[$i]} 복사 완료"
+    else
+        echo "  ❌ 소스 파일을 찾을 수 없습니다: $src"
+    fi
 done
 
-# 이미지 폴더도 복사
+# 이미지 폴더 복사
 if [[ -d "$SLIDES_DIR/images" ]]; then
+    echo "🖼️  이미지 폴더 복사 중..."
+    rm -rf "$OUTPUT_DIR/images"  # 기존 이미지 폴더 제거
     cp -r "$SLIDES_DIR/images" "$OUTPUT_DIR/"
-    echo "  🖼️  이미지 폴더 복사 완료"
+    echo "  ✅ 이미지 폴더 복사 완료"
+else
+    echo "⚠️  이미지 폴더를 찾을 수 없습니다: $SLIDES_DIR/images"
 fi
 
-# 문서 파일들도 복사 (링크 연결을 위해)
+# 문서 파일 복사
 if [[ -d "$DOCS_DIR" ]]; then
     echo "📄 문서 파일 복사 중..."
-    cp "$DOCS_DIR"/*.md "$OUTPUT_DIR/" 2>/dev/null || echo "⚠️  .md 파일을 찾을 수 없습니다."
+    for doc in "$DOCS_DIR"/*.md; do
+        if [[ -f "$doc" ]]; then
+            cp "$doc" "$OUTPUT_DIR/"
+            echo "  ✅ $(basename "$doc") 복사 완료"
+        fi
+    done
+else
+    echo "⚠️  문서 디렉토리를 찾을 수 없습니다: $DOCS_DIR"
 fi
 
-# 6. 빌드 정보 생성
-echo "ℹ️  빌드 정보 업데이트 중..."
-# generate_slides.py는 워크플로우에서 이미 실행되었으므로 여기서는 생략
+# 6. 슬라이드 인덱스 및 빌드 정보 생성
+echo "ℹ️  슬라이드 인덱스 및 빌드 정보 생성 중..."
+if command -v python3 &> /dev/null; then
+    python3 "$PROJECT_DIR/scripts/generate_slides.py"
+    if [[ $? -eq 0 ]]; then
+        echo "✅ 슬라이드 인덱스 및 빌드 정보 생성 완료"
+    else
+        echo "⚠️  슬라이드 인덱스 생성 중 오류 발생"
+    fi
+else
+    echo "⚠️  Python3를 찾을 수 없습니다. 슬라이드 인덱스 생성을 건너뜁니다."
+fi
 
 echo "🎉 교육 자료 생성 완료!"
 echo "📂 결과물 위치: $OUTPUT_DIR"

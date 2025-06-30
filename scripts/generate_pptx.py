@@ -4,6 +4,8 @@ Chrome Education PPTX Generator
 한글학교 선생님을 위한 크롬 웹브라우저 활용 교육 PowerPoint 생성기
 """
 
+import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -12,18 +14,41 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Pt
 
+# 로깅 설정
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('pptx_generator.log', mode='w'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
 
 class ChromeEducationPPTXGenerator:
     def __init__(self, project_dir=None):
         if project_dir is None:
             project_dir = Path(__file__).parent.parent
         
-        self.project_dir = Path(project_dir)
-        self.output_dir = self.project_dir / "output"
-        self.output_dir.mkdir(exist_ok=True)
+        logger.info("🔍 초기화 시작...")
+        logger.info(f"📂 프로젝트 디렉토리: {project_dir}")
         
-        # 기본 프레젠테이션 사용 (템플릿 문제로 인해)
-        print("🎯 기본 프레젠테이션 템플릿 사용")
+        self.project_dir = Path(project_dir)
+        # 출력 디렉토리 설정 및 생성
+        self.output_dir = Path(self.project_dir) / "output"
+        logger.info(f"📁 출력 디렉토리 경로: {self.output_dir}")
+        
+        if not self.output_dir.exists():
+            logger.info("📁 출력 디렉토리 생성 중...")
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            logger.info("✅ 출력 디렉토리 생성 완료")
+        else:
+            logger.info("✅ 출력 디렉토리 이미 존재함")
+        
+        # 기본 프레젠테이션 생성 (템플릿 사용 시 문제가 있어서 기본 생성으로 변경)
+        logger.info("📊 기본 프레젠테이션 템플릿으로 생성")
         self.prs = Presentation()
         
         # 색상 정의 (Chrome 브랜드 컬러)
@@ -61,7 +86,7 @@ class ChromeEducationPPTXGenerator:
         return title, content
     
     def add_title_slide(self):
-        """타이틀 슬라이드 추가"""
+        """타이틀 슬라이드 추가 - HTML 내용 정확히 반영"""
         slide_layout = self.get_safe_layout(0)  # Title Slide
         slide = self.prs.slides.add_slide(slide_layout)
         
@@ -70,27 +95,40 @@ class ChromeEducationPPTXGenerator:
         subtitle = slide.placeholders[1] if len(slide.placeholders) > 1 else None
         
         if title:
-            title.text = "수업을 쉽게, 자료를 예쁘게, 협업을 효율적으로"
-            title.text_frame.paragraphs[0].font.size = Pt(44)
+            title.text = "수업을 쉽게, 자료를 예쁘게,\n협업을 효율적으로"
+            title.text_frame.paragraphs[0].font.size = Pt(48)
             title.text_frame.paragraphs[0].font.color.rgb = self.colors['blue']
             title.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+            title.text_frame.paragraphs[0].font.bold = True
         
         if subtitle:
-            subtitle.text = "디지털 도구 완전정복\n한글학교 선생님을 위한 크롬 웹브라우저 활용 교육"
-            subtitle.text_frame.paragraphs[0].font.size = Pt(24)
-            subtitle.text_frame.paragraphs[0].font.color.rgb = self.colors['dark_gray']
+            subtitle.text = "— 디지털 도구 완전정복\n\n한글학교 선생님을 위한 크롬 웹브라우저 활용 교육"
+            
+            # 첫 번째 줄 (부제목)
+            subtitle.text_frame.paragraphs[0].text = "— 디지털 도구 완전정복"
+            subtitle.text_frame.paragraphs[0].font.size = Pt(28)
+            subtitle.text_frame.paragraphs[0].font.color.rgb = self.colors['red']
             subtitle.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
+            subtitle.text_frame.paragraphs[0].font.bold = True
+            
+            # 두 번째 줄 (설명)
+            p = subtitle.text_frame.add_paragraph()
+            p.text = "한글학교 선생님을 위한 크롬 웹브라우저 활용 교육"
+            p.font.size = Pt(20)
+            p.font.color.rgb = self.colors['dark_gray']
+            p.alignment = PP_ALIGN.CENTER
             
             # 날짜 추가
             p = subtitle.text_frame.add_paragraph()
             p.text = datetime.now().strftime("%Y년 %m월 %d일")
-            p.font.size = Pt(18)
+            p.font.size = Pt(16)
             p.font.color.rgb = self.colors['green']
+            p.alignment = PP_ALIGN.CENTER
         
         return slide
     
     def add_overview_slide(self):
-        """강의 개요 슬라이드 추가"""
+        """강의 개요 슬라이드 추가 - HTML 내용 정확히 반영"""
         slide_layout = self.get_safe_layout(1)  # Title and Content
         slide = self.prs.slides.add_slide(slide_layout)
         
@@ -98,27 +136,35 @@ class ChromeEducationPPTXGenerator:
         
         if title:
             title.text = "강의 개요"
+            title.text_frame.paragraphs[0].font.size = Pt(36)
             title.text_frame.paragraphs[0].font.color.rgb = self.colors['blue']
+            title.text_frame.paragraphs[0].font.bold = True
         
         if not content:
             return slide
             
         tf = content.text_frame
-        tf.text = "교육 목표"
+        tf.clear()  # 기존 내용 삭제
         
-        # 목표 항목들 추가
-        objectives = [
-            "크롬 브라우저의 교육적 활용 능력 향상",
-            "디지털 도구를 통한 수업 효율성 증대", 
-            "온라인 협업 및 자료 관리 역량 강화",
-            "AI 도구 활용을 통한 교육 혁신"
+        # 교육 과정 정보
+        p = tf.add_paragraph()
+        p.text = "교육 과정 정보"
+        p.font.size = Pt(24)
+        p.font.color.rgb = self.colors['red']
+        p.font.bold = True
+        
+        # 정보 항목들
+        info_items = [
+            ("목표", "크롬 웹브라우저를 활용하여 한글교육의 효율성을 높이고 디지털 교육 도구를 마스터하기"),
+            ("대상", "한글학교 교사 및 한국어 교육자"),
+            ("구성", "총 10차시 (기초 3차시, 중급 4차시, 고급 3차시)"),
+            ("방식", "이론 학습 + 실습 + 실제 적용 시나리오")
         ]
         
-        for objective in objectives:
+        for title_text, desc in info_items:
             p = tf.add_paragraph()
-            p.text = objective
-            p.level = 1
-            p.font.size = Pt(18)
+            p.text = f"• {title_text}: {desc}"
+            p.font.size = Pt(16)
             p.font.color.rgb = self.colors['dark_gray']
         
         return slide
@@ -136,15 +182,16 @@ class ChromeEducationPPTXGenerator:
         
         if not content:
             return slide
-        
+            
         tf = content.text_frame
         tf.text = "핵심 기능"
         
         features = [
-            "프로필 관리 - 교육용/개인용 분리",
-            "북마크 활용 - 체계적인 자료 정리",
-            "단축키 활용 - 업무 효율성 향상",
-            "기본 설정 최적화 - 한글교육 환경 구축"
+            "프로필 관리 및 설정 최적화",
+            "즐겨찾기와 북마크 체계적 관리",
+            "필수 단축키 마스터",
+            "탭 그룹 활용법",
+            "검색 및 번역 기능 활용"
         ]
         
         for feature in features:
@@ -164,12 +211,8 @@ class ChromeEducationPPTXGenerator:
         title, content = self.get_placeholders(slide)
         
         if title:
-            title.text = (
-                "중급 단계: 교육자를 위한 확장프로그램"
-            )
-            title.text_frame.paragraphs[0].font.color.rgb = (
-                self.colors['yellow']
-            )
+            title.text = "중급 단계: 교육자를 위한 확장프로그램"
+            title.text_frame.paragraphs[0].font.color.rgb = self.colors['yellow']
         
         if not content:
             return slide
@@ -407,29 +450,66 @@ class ChromeEducationPPTXGenerator:
     
     def generate_presentation(self):
         """전체 프레젠테이션 생성"""
-        print("🚀 Chrome Education PPTX Generator 시작")
+        logger.info("🚀 Chrome Education PPTX Generator 시작")
         
-        # 슬라이드 추가
-        self.add_title_slide()
-        self.add_overview_slide()
-        self.add_basic_features_slide()
-        self.add_extensions_slide()
-        self.add_korean_tools_slide()
-        self.add_workspace_slide()
-        self.add_ai_tools_slide()
-        self.add_practice_slide()
-        self.add_resources_slide()
-        self.add_contact_slide()
-        
-        # 날짜와 시간이 포함된 파일명 생성
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-        output_file = self.output_dir / f"chrome_education_slides_{timestamp}.pptx"
-        self.prs.save(str(output_file))
-        
-        print(f"✅ PowerPoint 프레젠테이션 생성 완료: {output_file}")
-        print(f"📊 총 슬라이드 수: {len(self.prs.slides)}")
-        
-        return output_file
+        try:
+            logger.info("1. 타이틀 슬라이드 생성 중...")
+            self.add_title_slide()
+            logger.debug("타이틀 슬라이드 생성 완료")
+            
+            logger.info("2. 개요 슬라이드 생성 중...")
+            self.add_overview_slide()
+            logger.debug("개요 슬라이드 생성 완료")
+            
+            logger.info("3. 기본 기능 슬라이드 생성 중...")
+            self.add_basic_features_slide()
+            logger.debug("기본 기능 슬라이드 생성 완료")
+            
+            logger.info("4. 확장프로그램 슬라이드 생성 중...")
+            self.add_extensions_slide()
+            logger.debug("확장프로그램 슬라이드 생성 완료")
+            
+            logger.info("5. 한글교육 도구 슬라이드 생성 중...")
+            self.add_korean_tools_slide()
+            logger.debug("한글교육 도구 슬라이드 생성 완료")
+            
+            logger.info("6. 워크스페이스 슬라이드 생성 중...")
+            self.add_workspace_slide()
+            logger.debug("워크스페이스 슬라이드 생성 완료")
+            
+            logger.info("7. AI 도구 슬라이드 생성 중...")
+            self.add_ai_tools_slide()
+            logger.debug("AI 도구 슬라이드 생성 완료")
+            
+            logger.info("8. 실습 슬라이드 생성 중...")
+            self.add_practice_slide()
+            logger.debug("실습 슬라이드 생성 완료")
+            
+            logger.info("9. 자료 슬라이드 생성 중...")
+            self.add_resources_slide()
+            logger.debug("자료 슬라이드 생성 완료")
+            
+            logger.info("10. 연락처 슬라이드 생성 중...")
+            self.add_contact_slide()
+            logger.debug("연락처 슬라이드 생성 완료")
+            
+            # 날짜와 시간이 포함된 파일명 생성
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+            output_file = self.output_dir / f"chrome_education_slides_{timestamp}.pptx"
+            
+            logger.info(f"💾 프레젠테이션 저장 중: {output_file}")
+            self.prs.save(str(output_file))
+            
+            logger.info(f"✅ PowerPoint 프레젠테이션 생성 완료: {output_file}")
+            logger.info(f"📊 총 슬라이드 수: {len(self.prs.slides)}")
+            
+            return output_file
+            
+        except Exception as e:
+            logger.error(f"❌ 오류 발생: {str(e)}")
+            logger.error(f"📍 오류 위치: {e.__traceback__.tb_frame.f_code.co_name}")
+            logger.exception("상세 오류:")
+            raise
 
 if __name__ == "__main__":
     generator = ChromeEducationPPTXGenerator()
