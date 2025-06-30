@@ -144,9 +144,40 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
                 --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
             
             # HTML을 PDF로 변환 (한글 폰트 지원)
-            weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/$PDF_FILENAME"
-            rm "$OUTPUT_DIR/chrome_edu_workbook.html"  # 임시 HTML 파일 삭제
-            echo "✅ weasyprint로 워크북 PDF 생성 완료: $PDF_FILENAME"
+            if command -v weasyprint &> /dev/null; then
+                if weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/$PDF_FILENAME"; then
+                    echo "✅ weasyprint로 PDF 생성 완료: $PDF_FILENAME"
+                else
+                    echo "⚠️  weasyprint로 PDF 생성 실패, pandoc으로 시도합니다..."
+                    pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
+                        --pdf-engine=xelatex \
+                        --variable mainfont="Noto Sans CJK KR" \
+                        --variable sansfont="Noto Sans CJK KR" \
+                        --variable monofont="Noto Sans Mono CJK KR" \
+                        --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
+                    if [ $? -eq 0 ]; then
+                        echo "✅ pandoc으로 PDF 생성 완료: $PDF_FILENAME"
+                    else
+                        echo "❌ PDF 생성 실패"
+                        exit 1
+                    fi
+                fi
+            else
+                echo "⚠️  weasyprint를 찾을 수 없습니다. pandoc으로 시도합니다..."
+                pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
+                    --pdf-engine=xelatex \
+                    --variable mainfont="Noto Sans CJK KR" \
+                    --variable sansfont="Noto Sans CJK KR" \
+                    --variable monofont="Noto Sans Mono CJK KR" \
+                    --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
+                if [ $? -eq 0 ]; then
+                    echo "✅ pandoc으로 PDF 생성 완료: $PDF_FILENAME"
+                else
+                    echo "❌ PDF 생성 실패"
+                    exit 1
+                fi
+            fi
+            rm -f "$OUTPUT_DIR/chrome_edu_workbook.html"  # 임시 HTML 파일 삭제
         else
             echo "⚠️  pandoc을 찾을 수 없습니다."
         fi
