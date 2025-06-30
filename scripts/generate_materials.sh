@@ -129,6 +129,10 @@ echo "✅ 슬라이드 인덱스 생성 완료"
 if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
     echo "📚 워크북 PDF 생성 중..."
     
+    # 날짜와 시간이 포함된 파일명 생성
+    TIMESTAMP=$(date +"%Y%m%d_%H%M")
+    PDF_FILENAME="chrome_edu_workbook_${TIMESTAMP}.pdf"
+    
     # weasyprint 우선 시도 (한글 지원 우수)
     if command -v weasyprint &> /dev/null; then
         echo "🔧 weasyprint를 사용하여 PDF 생성 중..."
@@ -140,32 +144,32 @@ if [[ -f "$DOCS_DIR/chrome_edu_workbook.md" ]]; then
                 --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
             
             # HTML을 PDF로 변환 (한글 폰트 지원)
-            weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/chrome_edu_workbook.pdf"
+            weasyprint "$OUTPUT_DIR/chrome_edu_workbook.html" "$OUTPUT_DIR/$PDF_FILENAME"
             rm "$OUTPUT_DIR/chrome_edu_workbook.html"  # 임시 HTML 파일 삭제
-            echo "✅ weasyprint로 워크북 PDF 생성 완료"
+            echo "✅ weasyprint로 워크북 PDF 생성 완료: $PDF_FILENAME"
         else
             echo "⚠️  pandoc을 찾을 수 없습니다."
         fi
     # pandoc 단독 사용 (두 번째 옵션)
     elif command -v pandoc &> /dev/null; then
         echo "🔧 pandoc을 사용하여 PDF 생성 중..."
-        pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/chrome_edu_workbook.pdf" \
+        pandoc "$DOCS_DIR/chrome_edu_workbook.md" -o "$OUTPUT_DIR/$PDF_FILENAME" \
             --pdf-engine=xelatex \
             --variable mainfont="Noto Sans CJK KR" \
             --variable sansfont="Noto Sans CJK KR" \
             --variable monofont="Noto Sans Mono CJK KR" \
             --metadata title="한글학교 선생님을 위한 크롬 웹브라우저 활용 실습 워크북"
-        echo "✅ pandoc으로 워크북 PDF 생성 완료"
+        echo "✅ pandoc으로 워크북 PDF 생성 완료: $PDF_FILENAME"
     # manus-md-to-pdf 사용 (세 번째 옵션)
     elif command -v manus-md-to-pdf &> /dev/null; then
         echo "🔧 manus-md-to-pdf를 사용하여 PDF 생성 중..."
-        manus-md-to-pdf "$DOCS_DIR/chrome_edu_workbook.md" "$OUTPUT_DIR/chrome_edu_workbook.pdf"
-        echo "✅ manus-md-to-pdf로 워크북 PDF 생성 완료"
+        manus-md-to-pdf "$DOCS_DIR/chrome_edu_workbook.md" "$OUTPUT_DIR/$PDF_FILENAME"
+        echo "✅ manus-md-to-pdf로 워크북 PDF 생성 완료: $PDF_FILENAME"
     else
         echo "⚠️  PDF 생성 도구를 찾을 수 없습니다. 기존 PDF를 복사합니다."
         if [[ -f "$DOCS_DIR/chrome_edu_workbook.pdf" ]]; then
-            cp "$DOCS_DIR/chrome_edu_workbook.pdf" "$OUTPUT_DIR/"
-            echo "✅ 기존 PDF 파일 복사 완료"
+            cp "$DOCS_DIR/chrome_edu_workbook.pdf" "$OUTPUT_DIR/$PDF_FILENAME"
+            echo "✅ 기존 PDF 파일 복사 완료: $PDF_FILENAME"
         else
             echo "❌ 기존 PDF 파일도 찾을 수 없습니다."
         fi

@@ -53,36 +53,35 @@ jobs:
           echo "📋 Verifying generated files for release:"
           echo "----------------------------------------"
 
-          # 필수 파일들 확인
-          REQUIRED_FILES=(
-            "output/index.html"
-            "output/chrome_education_slides.pptx"
-          )
-
-          OPTIONAL_FILES=(
-            "output/chrome_edu_workbook.pdf"
-          )
-
           ALL_GOOD=true
 
-          for file in "${REQUIRED_FILES[@]}"; do
-            if [ -f "$file" ]; then
-              size=$(stat -c%s "$file")
-              echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
-            else
-              echo "❌ $(basename $file): Missing (REQUIRED)"
-              ALL_GOOD=false
-            fi
-          done
+          # HTML Index 확인
+          if [ -f "output/index.html" ]; then
+            size=$(stat -c%s "output/index.html")
+            echo "✅ index.html: $(printf "%'d" $size) bytes"
+          else
+            echo "❌ index.html: Missing (REQUIRED)"
+            ALL_GOOD=false
+          fi
 
-          for file in "${OPTIONAL_FILES[@]}"; do
-            if [ -f "$file" ]; then
-              size=$(stat -c%s "$file")
-              echo "✅ $(basename $file): $(printf "%'d" $size) bytes"
-            else
-              echo "⚠️ $(basename $file): Missing (optional)"
-            fi
-          done
+          # PPTX 파일 확인 (타임스탬프 포함)
+          PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
+          if [ -n "$PPTX_FILE" ]; then
+            size=$(stat -c%s "$PPTX_FILE")
+            echo "✅ $(basename "$PPTX_FILE"): $(printf "%'d" $size) bytes"
+          else
+            echo "❌ chrome_education_slides_*.pptx: Missing (REQUIRED)"
+            ALL_GOOD=false
+          fi
+
+          # PDF 파일 확인 (타임스탬프 포함)
+          PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
+          if [ -n "$PDF_FILE" ]; then
+            size=$(stat -c%s "$PDF_FILE")
+            echo "✅ $(basename "$PDF_FILE"): $(printf "%'d" $size) bytes"
+          else
+            echo "⚠️ chrome_edu_workbook_*.pdf: Missing (optional)"
+          fi
 
           if [ "$ALL_GOOD" = false ]; then
             echo "❌ Required files are missing. Release cannot proceed."
@@ -113,16 +112,21 @@ jobs:
           cd ..
 
           # 개별 파일들도 준비 (버전 태그 포함)
-          if [ -f "output/chrome_edu_workbook.pdf" ]; then
-            cp output/chrome_edu_workbook.pdf chrome-education-workbook-${{ github.ref_name }}.pdf
+          # PDF 파일 복사
+          PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
+          if [ -n "$PDF_FILE" ]; then
+            cp "$PDF_FILE" "chrome-education-workbook-${{ github.ref_name }}.pdf"
           fi
 
+          # HTML 파일 복사
           if [ -f "output/index.html" ]; then
-            cp output/index.html chrome-education-slides-${{ github.ref_name }}.html
+            cp output/index.html "chrome-education-slides-${{ github.ref_name }}.html"
           fi
 
-          if [ -f "output/chrome_education_slides.pptx" ]; then
-            cp output/chrome_education_slides.pptx chrome-education-slides-${{ github.ref_name }}.pptx
+          # PPTX 파일 복사
+          PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
+          if [ -n "$PPTX_FILE" ]; then
+            cp "$PPTX_FILE" "chrome-education-slides-${{ github.ref_name }}.pptx"
           fi
 
           echo "✅ Enhanced release package created"
@@ -139,16 +143,21 @@ jobs:
           PDF_SIZE=""
           HTML_SIZE=""
 
-          if [ -f "output/chrome_education_slides.pptx" ]; then
-            size=$(stat -c%s "output/chrome_education_slides.pptx")
+          # PPTX 파일 크기
+          PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
+          if [ -n "$PPTX_FILE" ]; then
+            size=$(stat -c%s "$PPTX_FILE")
             PPTX_SIZE="$(echo "scale=1; $size / 1024 / 1024" | bc -l) MB"
           fi
 
-          if [ -f "output/chrome_edu_workbook.pdf" ]; then
-            size=$(stat -c%s "output/chrome_edu_workbook.pdf")
+          # PDF 파일 크기
+          PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
+          if [ -n "$PDF_FILE" ]; then
+            size=$(stat -c%s "$PDF_FILE")
             PDF_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"
           fi
 
+          # HTML 파일 크기
           if [ -f "output/index.html" ]; then
             size=$(stat -c%s "output/index.html")
             HTML_SIZE="$(echo "scale=1; $size / 1024" | bc -l) KB"

@@ -434,8 +434,9 @@ class ChromeEducationPPTXGenerator:
         self.add_resources_slide()
         self.add_contact_slide()
         
-        # 파일 저장
-        output_file = self.output_dir / "chrome_education_slides.pptx"
+        # 날짜와 시간이 포함된 파일명 생성
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        output_file = self.output_dir / f"chrome_education_slides_{timestamp}.pptx"
         self.prs.save(str(output_file))
         
         print(f"✅ PowerPoint 프레젠테이션 생성 완료: {output_file}")

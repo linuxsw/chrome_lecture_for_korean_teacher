@@ -70,6 +70,9 @@ jobs:
           echo "📋 Generated files verification:"
           echo "----------------------------------------"
 
+          # 현재 날짜와 시간 형식의 타임스탬프
+          TIMESTAMP=$(date +"%Y%m%d_%H%M")
+
           if [ -f "output/index.html" ]; then
             size=$(stat -c%s "output/index.html")
             echo "✅ HTML Index: $(printf "%'d" $size) bytes"
@@ -77,18 +80,24 @@ jobs:
             echo "❌ HTML Index: Missing"
           fi
 
-          if [ -f "output/chrome_education_slides.pptx" ]; then
-            size=$(stat -c%s "output/chrome_education_slides.pptx")
+          # PPTX 파일 확인 (타임스탬프 포함)
+          PPTX_FILE=$(find output -name "chrome_education_slides_*.pptx" | head -n 1)
+          if [ -n "$PPTX_FILE" ]; then
+            size=$(stat -c%s "$PPTX_FILE")
             mb=$(echo "scale=1; $size / 1024 / 1024" | bc -l)
             echo "✅ PowerPoint: $(printf "%'d" $size) bytes (${mb} MB)"
+            echo "   파일: $(basename "$PPTX_FILE")"
           else
             echo "❌ PowerPoint: Missing"
           fi
 
-          if [ -f "output/chrome_edu_workbook.pdf" ]; then
-            size=$(stat -c%s "output/chrome_edu_workbook.pdf")
+          # PDF 파일 확인 (타임스탬프 포함)
+          PDF_FILE=$(find output -name "chrome_edu_workbook_*.pdf" | head -n 1)
+          if [ -n "$PDF_FILE" ]; then
+            size=$(stat -c%s "$PDF_FILE")
             kb=$(echo "scale=1; $size / 1024" | bc -l)
             echo "✅ PDF Workbook: $(printf "%'d" $size) bytes (${kb} KB)"
+            echo "   파일: $(basename "$PDF_FILE")"
           else
             echo "⚠️ PDF Workbook: Missing (optional)"
           fi
