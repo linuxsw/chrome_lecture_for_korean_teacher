@@ -57,11 +57,11 @@ jobs:
         run: |
           echo "🚀 Starting material generation..."
 
-          # Python 스크립트 실행
-          python scripts/generate_slides.py
-
-          # Bash 스크립트 실행
+          # Bash 스크립트 실행 (PDF/PPTX 생성 및 슬라이드 복사)
           bash scripts/generate_materials.sh
+
+          # Python 스크립트 실행 (메인 인덱스 생성 및 build_info.json 업데이트)
+          python scripts/generate_slides.py
 
           echo "✅ Material generation completed"
 
